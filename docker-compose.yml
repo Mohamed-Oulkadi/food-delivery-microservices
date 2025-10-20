@@ -1,21 +1,72 @@
+#services:
+#  postgres:
+#    image: postgres:latest
+#    container_name: postgres-restau
+#    environment:
+#      POSTGRES_USER: postgres
+#      POSTGRES_PASSWORD: pass
+#      POSTGRES_DB: restau-db
+#    ports:
+#      - "5332:5432"
+#    volumes:
+#      - postgres_data:/var/lib/postgresql/data
+#    healthcheck:
+#      test: ["CMD-SHELL", "pg_isready -U postgres"]
+#      interval: 5s
+#      timeout: 5s
+#      retries: 5
+#    restart: unless-stopped
+#
+#volumes:
+#  postgres_data:
+
+version: '3.8'
+
 services:
+  # Service de la Base de Données
   postgres:
-    image: postgres:latest
-    container_name: postgres-restau
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: pass
-      POSTGRES_DB: restau-db
+      image: postgres:latest
+      container_name: postgres-restau
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: pass
+        POSTGRES_DB: restau-db
+      ports:
+        - "5332:5432"
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+      restart: unless-stopped
+
+
+  # 2. Backend Service (Spring Boot)
+  backend:
+    # Builds the image from the Dockerfile in the 'restaurant-service' folder
+    build: ./RestaurantService
+    container_name: backend_service
     ports:
-      - "5332:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-    restart: unless-stopped
+      - "8082:8082"
+    # Ensures the database is started before the backend
+    depends_on:
+      - postgres
+    restart: on-failure
+
+  # 3. Frontend Service (React + Nginx)
+  frontend:
+    # Builds the image from the Dockerfile in the 'restaurant-frontend' folder
+    build: ./restaurant-frontend
+    container_name: frontend_service
+    ports:
+      # Maps your local port 5173 to the container's Nginx port 80
+      - "5173:80"
+    # Ensures the backend is started before the frontend
+    depends_on:
+      - backend
+    restart: on-failure
 
 volumes:
   postgres_data:
