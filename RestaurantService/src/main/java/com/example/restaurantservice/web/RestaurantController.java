@@ -15,6 +15,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
 @RestController
 @RequestMapping("/restaurants")
 @AllArgsConstructor
@@ -39,6 +48,26 @@ public class RestaurantController {
     @GetMapping("/{restaurantId}")
     public ResponseEntity<Restaurant> getRestaurantById(@PathVariable UUID restaurantId) {
         return ResponseEntity.ok(restaurantService.getRestaurantById(restaurantId));
+    }
+
+    // ▼▼▼ NEW METHOD ▼▼▼
+    /**
+     * PUT /restaurants/{restaurantId} - Update an existing restaurant
+     */
+    @PutMapping("/{restaurantId}")
+    public ResponseEntity<Restaurant> updateRestaurant(@PathVariable UUID restaurantId, @RequestBody RestaurantDto restaurantDto) {
+        Restaurant updatedRestaurant = restaurantService.updateRestaurant(restaurantId, restaurantDto);
+        return ResponseEntity.ok(updatedRestaurant);
+    }
+
+    // ▼▼▼ NEW METHOD ▼▼▼
+    /**
+     * DELETE /restaurants/{restaurantId} - Delete a restaurant
+     */
+    @DeleteMapping("/{restaurantId}")
+    public ResponseEntity<Void> deleteRestaurant(@PathVariable UUID restaurantId) {
+        restaurantService.deleteRestaurant(restaurantId);
+        return ResponseEntity.noContent().build(); // Returns HTTP 204 No Content
     }
 
     // GET /restaurants/{restaurantId}/menu - Get a restaurant's menu

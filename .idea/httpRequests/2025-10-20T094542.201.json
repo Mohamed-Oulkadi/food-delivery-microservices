@@ -1,0 +1,9 @@
+{
+  "restaurantId": "13ef46b8-b31f-493b-b39a-e12566d4b75d",
+  "name": "Pizza Palace",
+  "cuisineType": "Italian",
+  "menu": {
+    "menuId": "a493d599-5a83-480f-ab9d-4b28a141d1a2",
+    "items": []
+  }
+}

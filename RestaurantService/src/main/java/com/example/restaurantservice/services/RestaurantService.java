@@ -6,6 +6,7 @@ import com.example.restaurantservice.entities.Menu;
 import com.example.restaurantservice.entities.MenuItem;
 import com.example.restaurantservice.entities.Restaurant;
 import com.example.restaurantservice.repository.RestaurantRepository;
+import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,18 +16,17 @@ import java.util.List;
 import java.util.UUID;
 
 @Service
-@RequiredArgsConstructor
+@Transactional
+@AllArgsConstructor
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
 
-    @Transactional
     public Restaurant createRestaurant(RestaurantDto restaurantDto) {
         Restaurant restaurant = new Restaurant();
         restaurant.setName(restaurantDto.getName());
         restaurant.setCuisineType(restaurantDto.getCuisineType());
 
-        // Create an empty menu for the new restaurant
         Menu menu = new Menu();
         menu.setItems(new ArrayList<>());
         restaurant.setMenu(menu);
@@ -47,7 +47,6 @@ public class RestaurantService {
         return getRestaurantById(restaurantId).getMenu();
     }
 
-    @Transactional
     public MenuItem addMenuItemToMenu(UUID restaurantId, MenuItemDto menuItemDto) {
         Restaurant restaurant = getRestaurantById(restaurantId);
 
@@ -58,15 +57,30 @@ public class RestaurantService {
         newItem.setAvailable(menuItemDto.isAvailable());
 
         restaurant.getMenu().getItems().add(newItem);
-        restaurantRepository.save(restaurant); // The cascade will save the new item
+        // Saving the parent (Restaurant) will cascade and save the new MenuItem
+        restaurantRepository.save(restaurant);
 
         return newItem;
     }
 
-    // This is a simplified version. In a real application, you might communicate with an Order Service.
+    public Restaurant updateRestaurant(UUID restaurantId, RestaurantDto restaurantDto) {
+        Restaurant existingRestaurant = getRestaurantById(restaurantId);
+        existingRestaurant.setName(restaurantDto.getName());
+        existingRestaurant.setCuisineType(restaurantDto.getCuisineType());
+        return restaurantRepository.save(existingRestaurant);
+    }
+
+
+    public void deleteRestaurant(UUID restaurantId) {
+        if (!restaurantRepository.existsById(restaurantId)) {
+            throw new RuntimeException("Restaurant not found with id: " + restaurantId);
+        }
+        restaurantRepository.deleteById(restaurantId);
+    }
+
     public String updateOrderStatus(UUID orderId, String status) {
+        // This is a placeholder for interaction with an Order Service
         System.out.printf("Updating status for order %s to %s%n", orderId, status);
-        // Business logic to update order status would go here.
         return String.format("Order %s status updated to %s", orderId, status);
     }
 }
