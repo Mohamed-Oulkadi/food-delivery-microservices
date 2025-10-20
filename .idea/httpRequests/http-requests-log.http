@@ -1,0 +1,43 @@
+POST http://localhost:8082/restaurants/13ef46b8-b31f-493b-b39a-e12566d4b75d/menu/items
+Content-Type: application/json
+Content-Length: 119
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "name": "Margherita Pizza",
+  "description": "Classic cheese and tomato",
+  "price": 12.50,
+  "isAvailable": true
+}
+
+<> 2025-10-20T094816.201.json
+
+###
+
+POST http://localhost:8082/restaurants
+Content-Type: application/json
+Content-Length: 56
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "name": "Pizza Palace",
+  "cuisineType": "Italian"
+}
+
+<> 2025-10-20T094542.201.json
+
+###
+
+GET http://localhost:8082/restaurants
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2025-10-20T094348.200.json
+
+###
+

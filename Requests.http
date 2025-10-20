@@ -1,5 +1,23 @@
 ### GET request to example server
-GET https://examples.http-client.intellij.net/get
-    ?generated-in=IntelliJ IDEA
+GET http://localhost:8082/restaurants
 
 ###
+
+POST http://localhost:8082/restaurants
+Content-Type: application/json
+
+{
+  "name": "Pizza Palace",
+  "cuisineType": "Italian"
+}
+###
+
+POST http://localhost:8082/restaurants/13ef46b8-b31f-493b-b39a-e12566d4b75d/menu/items
+Content-Type: application/json
+
+{
+  "name": "Margherita Pizza",
+  "description": "Classic cheese and tomato",
+  "price": 12.50,
+  "isAvailable": true
+}
