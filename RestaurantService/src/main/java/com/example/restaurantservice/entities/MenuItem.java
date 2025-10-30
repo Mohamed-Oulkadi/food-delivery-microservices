@@ -15,8 +15,8 @@ import java.util.UUID;
 public class MenuItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID menuItemId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long menuItemId;
 
     private String name;
     private String description;

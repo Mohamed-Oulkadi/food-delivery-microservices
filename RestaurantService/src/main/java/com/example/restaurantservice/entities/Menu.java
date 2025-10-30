@@ -13,8 +13,8 @@ import java.util.UUID;
 public class Menu {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID menuId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long menuId;
 
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "menu_id")

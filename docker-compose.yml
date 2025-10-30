@@ -1,72 +1,129 @@
-#services:
-#  postgres:
-#    image: postgres:latest
-#    container_name: postgres-restau
-#    environment:
-#      POSTGRES_USER: postgres
-#      POSTGRES_PASSWORD: pass
-#      POSTGRES_DB: restau-db
-#    ports:
-#      - "5332:5432"
-#    volumes:
-#      - postgres_data:/var/lib/postgresql/data
-#    healthcheck:
-#      test: ["CMD-SHELL", "pg_isready -U postgres"]
-#      interval: 5s
-#      timeout: 5s
-#      retries: 5
-#    restart: unless-stopped
-#
-#volumes:
-#  postgres_data:
-
-version: '3.8'
+version: "3.9"
 
 services:
-  # Service de la Base de Données
-  postgres:
-      image: postgres:latest
-      container_name: postgres-restau
-      environment:
-        POSTGRES_USER: postgres
-        POSTGRES_PASSWORD: pass
-        POSTGRES_DB: restau-db
-      ports:
-        - "5332:5432"
-      volumes:
-        - postgres_data:/var/lib/postgresql/data
-      healthcheck:
-        test: ["CMD-SHELL", "pg_isready -U postgres"]
-        interval: 5s
-        timeout: 5s
-        retries: 5
-      restart: unless-stopped
+  postgres_restaurant:
+    image: postgres:17
+    container_name: restau_db
+    environment:
+      POSTGRES_DB: restau_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5332:5432"
+    volumes:
+      - postgres_restaurant_data:/var/lib/postgresql/data
+    restart: always
 
+  postgres_order:
+    image: postgres:17
+    container_name: order_db
+    environment:
+      POSTGRES_DB: order_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5223:5432"
+    volumes:
+      - postgres_order_data:/var/lib/postgresql/data
+    restart: always
 
-  # 2. Backend Service (Spring Boot)
-  backend:
-    # Builds the image from the Dockerfile in the 'restaurant-service' folder
-    build: ./RestaurantService
-    container_name: backend_service
+  postgres_delivery:
+    image: postgres:17
+    container_name: delivery_db
+    environment:
+      POSTGRES_DB: delivery_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_delivery_data:/var/lib/postgresql/data
+    restart: always
+
+  postgres_user:
+    image: postgres:17
+    container_name: user_db
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_user_data:/var/lib/postgresql/data
+    restart: always
+
+  backend-restaurant:
+    build:
+      context: ./RestaurantService
+    container_name: backend_restaurant_service
     ports:
       - "8082:8082"
-    # Ensures the database is started before the backend
     depends_on:
-      - postgres
+      - postgres_restaurant
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_restaurant:5432/restau_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: pass
     restart: on-failure
 
-  # 3. Frontend Service (React + Nginx)
-  frontend:
-    # Builds the image from the Dockerfile in the 'restaurant-frontend' folder
-    build: ./restaurant-frontend
-    container_name: frontend_service
+  backend-order:
+    build:
+      context: ./OrderService
+    container_name: backend_order_service
     ports:
-      # Maps your local port 5173 to the container's Nginx port 80
-      - "5173:80"
-    # Ensures the backend is started before the frontend
+      - "8081:8081"
     depends_on:
-      - backend
+      - postgres_order
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_order:5432/order_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: pass
+    restart: on-failure
+
+  backend-delivery:
+    build:
+      context: ./deliveryService
+    container_name: backend_delivery_service
+    ports:
+      - "8083:8083"
+    depends_on:
+      - postgres_delivery
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_delivery:5432/delivery_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: pass
+    restart: on-failure
+
+  backend-user:
+    build:
+      context: ./userService
+    container_name: backend_user_service
+    ports:
+      - "8084:8084"
+    depends_on:
+      - postgres_user
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_user:5432/user_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: pass
+    restart: on-failure
+
+  app-frontend:
+    build:
+      context: ./app-frontend
+    container_name: app_frontend_service
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend-restaurant
+      - backend-order
+      - backend-delivery
+      - backend-user
     restart: on-failure
 
 volumes:
-  postgres_data:
+  postgres_restaurant_data:
+  postgres_order_data:
+  postgres_delivery_data:
+  postgres_user_data:

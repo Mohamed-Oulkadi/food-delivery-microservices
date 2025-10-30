@@ -1,0 +1,24 @@
+### GET request to example server
+GET http://localhost:8081
+
+###
+
+POST http://localhost:8081/orders
+Content-Type: application/json
+
+{
+  "userId": "22",
+  "restaurantId": "1",
+  "items": [
+    {
+      "menuItemId": "1",
+      "quantity": 2,
+      "price": 12.50
+    },
+    {
+      "menuItemId": "1",
+      "quantity": 1,
+      "price": 15.00
+    }
+  ]
+}

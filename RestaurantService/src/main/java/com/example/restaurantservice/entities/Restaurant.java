@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.awt.*;
-import java.util.UUID;
 
 @Entity
 @Data
@@ -13,8 +12,8 @@ import java.util.UUID;
 public class Restaurant {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID restaurantId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long restaurantId;
 
     private String name;
     private String cuisineType;

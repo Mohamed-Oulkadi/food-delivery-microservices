@@ -38,16 +38,16 @@ public class RestaurantService {
         return restaurantRepository.findAll();
     }
 
-    public Restaurant getRestaurantById(UUID restaurantId) {
+    public Restaurant getRestaurantById(Long restaurantId) {
         return restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RuntimeException("Restaurant not found with id: " + restaurantId));
     }
 
-    public Menu getRestaurantMenu(UUID restaurantId) {
+    public Menu getRestaurantMenu(Long restaurantId) {
         return getRestaurantById(restaurantId).getMenu();
     }
 
-    public MenuItem addMenuItemToMenu(UUID restaurantId, MenuItemDto menuItemDto) {
+    public MenuItem addMenuItemToMenu(Long restaurantId, MenuItemDto menuItemDto) {
         Restaurant restaurant = getRestaurantById(restaurantId);
 
         MenuItem newItem = new MenuItem();
@@ -63,7 +63,7 @@ public class RestaurantService {
         return newItem;
     }
 
-    public Restaurant updateRestaurant(UUID restaurantId, RestaurantDto restaurantDto) {
+    public Restaurant updateRestaurant(Long restaurantId, RestaurantDto restaurantDto) {
         Restaurant existingRestaurant = getRestaurantById(restaurantId);
         existingRestaurant.setName(restaurantDto.getName());
         existingRestaurant.setCuisineType(restaurantDto.getCuisineType());
@@ -71,14 +71,14 @@ public class RestaurantService {
     }
 
 
-    public void deleteRestaurant(UUID restaurantId) {
+    public void deleteRestaurant(Long restaurantId) {
         if (!restaurantRepository.existsById(restaurantId)) {
             throw new RuntimeException("Restaurant not found with id: " + restaurantId);
         }
         restaurantRepository.deleteById(restaurantId);
     }
 
-    public String updateOrderStatus(UUID orderId, String status) {
+    public String updateOrderStatus(Long orderId, String status) {
         // This is a placeholder for interaction with an Order Service
         System.out.printf("Updating status for order %s to %s%n", orderId, status);
         return String.format("Order %s status updated to %s", orderId, status);
