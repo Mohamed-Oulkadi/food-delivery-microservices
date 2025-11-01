@@ -1,6 +1,7 @@
-version: "3.9"
+# This file runs all 9 services (4 databases, 4 backends, 1 frontend)
 
 services:
+  # 1. Databases
   postgres_restaurant:
     image: postgres:17
     container_name: restau_db
@@ -12,6 +13,8 @@ services:
       - "5332:5432"
     volumes:
       - postgres_restaurant_data:/var/lib/postgresql/data
+    networks:
+      - expressfood-network
     restart: always
 
   postgres_order:
@@ -25,6 +28,8 @@ services:
       - "5223:5432"
     volumes:
       - postgres_order_data:/var/lib/postgresql/data
+    networks:
+      - expressfood-network
     restart: always
 
   postgres_delivery:
@@ -38,6 +43,8 @@ services:
       - "5434:5432"
     volumes:
       - postgres_delivery_data:/var/lib/postgresql/data
+    networks:
+      - expressfood-network
     restart: always
 
   postgres_user:
@@ -51,8 +58,11 @@ services:
       - "5435:5432"
     volumes:
       - postgres_user_data:/var/lib/postgresql/data
+    networks:
+      - expressfood-network
     restart: always
 
+  # 2. Backends
   backend-restaurant:
     build:
       context: ./RestaurantService
@@ -65,6 +75,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_restaurant:5432/restau_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: pass
+    networks:
+      - expressfood-network
     restart: on-failure
 
   backend-order:
@@ -79,6 +91,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_order:5432/order_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: pass
+    networks:
+      - expressfood-network
     restart: on-failure
 
   backend-delivery:
@@ -93,6 +107,8 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_delivery:5432/delivery_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: pass
+    networks:
+      - expressfood-network
     restart: on-failure
 
   backend-user:
@@ -107,23 +123,42 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_user:5432/user_db
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: pass
+    networks:
+      - expressfood-network
     restart: on-failure
 
-  app-frontend:
+  # 3. Frontend
+  expressfood-app:
     build:
-      context: ./app-frontend
-    container_name: app_frontend_service
+      context: ./app-frontend # Make sure this folder name matches your React app
+      dockerfile: Dockerfile
+    container_name: expressfood-app
     ports:
       - "3000:80"
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+    networks:
+      - expressfood-network
     depends_on:
       - backend-restaurant
       - backend-order
       - backend-delivery
       - backend-user
-    restart: on-failure
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
 
+# Define all volumes
 volumes:
   postgres_restaurant_data:
   postgres_order_data:
   postgres_delivery_data:
   postgres_user_data:
+
+# Define the shared network
+networks:
+  expressfood-network:
+    driver: bridge

@@ -4,8 +4,17 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9a0198fb-5cd7-41d5-af10-c82b1074775f" name="Changes" comment="implement restaurant service with CRUD operations and menu management">
+    <list default="true" id="9a0198fb-5cd7-41d5-af10-c82b1074775f" name="Changes" comment="add user and delivery services with CRUD operations and database seeding">
+      <change afterPath="$PROJECT_DIR$/.idea/data_source_mapping.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/OrderService/src/main/java/com/example/orderservice/web/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/OrderService/src/main/java/com/example/orderservice/web/OrderController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/restaurantservice/web/RestaurantController.java" beforeDir="false" afterPath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/restaurantservice/web/RestaurantController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/deliveryService/src/main/java/com/example/deliveryservice/web/DeliveryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/deliveryService/src/main/java/com/example/deliveryservice/web/DeliveryController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/userService/src/main/java/com/example/userservice/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/userService/src/main/java/com/example/userservice/config/SecurityConfig.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/userService/src/main/java/com/example/userservice/web/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/userService/src/main/java/com/example/userservice/web/UserController.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,6 +150,10 @@
       <workItem from="1760959260634" duration="2142000" />
       <workItem from="1761160133965" duration="25000" />
       <workItem from="1761160234545" duration="340000" />
+      <workItem from="1761804619352" duration="753000" />
+      <workItem from="1761812725544" duration="1575000" />
+      <workItem from="1761916131539" duration="124000" />
+      <workItem from="1762032169265" duration="5062000" />
     </task>
     <task id="LOCAL-00001" summary="implement restaurant service with CRUD operations and menu management">
       <option name="closed" value="true" />
@@ -150,7 +163,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760950249170</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="add user and delivery services with CRUD operations and database seeding">
+      <option name="closed" value="true" />
+      <created>1761804705659</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1761804705659</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -161,6 +182,7 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="implement restaurant service with CRUD operations and menu management" />
-    <option name="LAST_COMMIT_MESSAGE" value="implement restaurant service with CRUD operations and menu management" />
+    <MESSAGE value="add user and delivery services with CRUD operations and database seeding" />
+    <option name="LAST_COMMIT_MESSAGE" value="add user and delivery services with CRUD operations and database seeding" />
   </component>
 </project>

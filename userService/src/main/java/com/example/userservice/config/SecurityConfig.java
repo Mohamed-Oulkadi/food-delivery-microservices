@@ -38,7 +38,7 @@ public class SecurityConfig {
                 // Define authorization rules
                 .authorizeHttpRequests(authz -> authz
                         // For now, allow all requests to /users/**
-                        .requestMatchers("/users/**").permitAll()
+                        .requestMatchers("/api/users/**").permitAll()
                         // All other requests (if any) must be authenticated
                         .anyRequest().authenticated()
                 );
