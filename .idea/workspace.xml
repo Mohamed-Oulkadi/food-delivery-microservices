@@ -4,18 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="9a0198fb-5cd7-41d5-af10-c82b1074775f" name="Changes" comment="add user and delivery services with CRUD operations and database seeding">
-      <change afterPath="$PROJECT_DIR$/.idea/data_source_mapping.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/OrderService/src/main/java/com/example/orderservice/web/OrderController.java" beforeDir="false" afterPath="$PROJECT_DIR$/OrderService/src/main/java/com/example/orderservice/web/OrderController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/restaurantservice/web/RestaurantController.java" beforeDir="false" afterPath="$PROJECT_DIR$/RestaurantService/src/main/java/com/example/restaurantservice/web/RestaurantController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/deliveryService/src/main/java/com/example/deliveryservice/web/DeliveryController.java" beforeDir="false" afterPath="$PROJECT_DIR$/deliveryService/src/main/java/com/example/deliveryservice/web/DeliveryController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/userService/src/main/java/com/example/userservice/config/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/userService/src/main/java/com/example/userservice/config/SecurityConfig.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/userService/src/main/java/com/example/userservice/web/UserController.java" beforeDir="false" afterPath="$PROJECT_DIR$/userService/src/main/java/com/example/userservice/web/UserController.java" afterDir="false" />
-    </list>
+    <list default="true" id="9a0198fb-5cd7-41d5-af10-c82b1074775f" name="Changes" comment="add data source configurations and update API endpoints for delivery, order, and user services" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -154,6 +143,7 @@
       <workItem from="1761812725544" duration="1575000" />
       <workItem from="1761916131539" duration="124000" />
       <workItem from="1762032169265" duration="5062000" />
+      <workItem from="1762038448342" duration="180000" />
     </task>
     <task id="LOCAL-00001" summary="implement restaurant service with CRUD operations and menu management">
       <option name="closed" value="true" />
@@ -171,7 +161,15 @@
       <option name="project" value="LOCAL" />
       <updated>1761804705659</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="add data source configurations and update API endpoints for delivery, order, and user services">
+      <option name="closed" value="true" />
+      <created>1762038540391</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1762038540391</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -183,6 +181,7 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="implement restaurant service with CRUD operations and menu management" />
     <MESSAGE value="add user and delivery services with CRUD operations and database seeding" />
-    <option name="LAST_COMMIT_MESSAGE" value="add user and delivery services with CRUD operations and database seeding" />
+    <MESSAGE value="add data source configurations and update API endpoints for delivery, order, and user services" />
+    <option name="LAST_COMMIT_MESSAGE" value="add data source configurations and update API endpoints for delivery, order, and user services" />
   </component>
 </project>
