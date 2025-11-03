@@ -6,4 +6,5 @@ import lombok.Data;
 public class RestaurantDto {
     private String name;
     private String cuisineType;
+    private String imageUrl;
 }

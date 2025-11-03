@@ -12,6 +12,8 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
 
   const { src, alt, style, className, ...rest } = props
 
+  const fullSrc = src && !src.startsWith('http') ? `http://localhost:8082${src}` : src;
+
   return didError ? (
     <div
       className={`inline-block bg-gray-100 text-center align-middle ${className ?? ''}`}
@@ -22,6 +24,6 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
       </div>
     </div>
   ) : (
-    <img src={src} alt={alt} className={className} style={style} {...rest} onError={handleError} />
+    <img src={fullSrc} alt={alt} className={className} style={style} {...rest} onError={handleError} />
   )
 }

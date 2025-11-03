@@ -22,6 +22,7 @@ import {
 } from '../components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
 import { mockRestaurants, mockMenuItems, mockUsers, Restaurant, MenuItem } from '../lib/mockData';
+import { uploadRestaurantImage, uploadMenuItemImage } from '../services/api';
 import { toast } from 'sonner@2.0.3';
 
 export const AdminPage: React.FC = () => {
@@ -40,6 +41,8 @@ export const AdminPage: React.FC = () => {
     cuisineType: '',
     address: ''
   });
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedMenuItemFile, setSelectedMenuItemFile] = useState<File | null>(null);
 
   // Menu item form state
   const [menuItemForm, setMenuItemForm] = useState({
@@ -51,6 +54,7 @@ export const AdminPage: React.FC = () => {
   const handleAddRestaurant = () => {
     setEditingRestaurant(null);
     setRestaurantForm({ name: '', cuisineType: '', address: '' });
+    setSelectedFile(null);
     setIsRestaurantDialogOpen(true);
   };
 
@@ -61,40 +65,73 @@ export const AdminPage: React.FC = () => {
       cuisineType: restaurant.cuisineType,
       address: restaurant.address
     });
+    setSelectedFile(null);
     setIsRestaurantDialogOpen(true);
   };
 
-  const handleSaveRestaurant = () => {
+  const handleSaveRestaurant = async () => {
     if (!restaurantForm.name || !restaurantForm.cuisineType || !restaurantForm.address) {
       toast.error('Please fill in all fields');
       return;
     }
 
     if (editingRestaurant) {
+      const updatedRestaurant = { ...editingRestaurant, ...restaurantForm };
+      if (selectedFile) {
+        try {
+          const imageUrl = await uploadRestaurantImage(editingRestaurant.restaurantId, selectedFile);
+          updatedRestaurant.imageUrl = imageUrl.data;
+        } catch (error) {
+          toast.error('Failed to upload image');
+          return;
+        }
+      }
       setRestaurants(prev =>
-        prev.map(r => r.id === editingRestaurant.id
-          ? { ...r, ...restaurantForm }
+        prev.map(r => r.restaurantId === editingRestaurant.restaurantId
+          ? updatedRestaurant
           : r
         )
       );
       toast.success('Restaurant updated successfully');
     } else {
-      const newRestaurant: Restaurant = {
-        id: `${Date.now()}`,
+      // First create the restaurant to get an ID
+      const newRestaurantData = {
         ...restaurantForm,
-        image: 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800',
-        rating: 4.5,
-        deliveryTime: '30-40 min'
+        imageUrl: '', // temporary empty
+        rating: 4.5, // default rating
+        deliveryTime: '30-40 min' // default time
       };
-      setRestaurants(prev => [...prev, newRestaurant]);
-      toast.success('Restaurant added successfully');
+
+      try {
+        // This is a mock implementation. In a real app, you would post to your API
+        // and get the created restaurant back with its new ID.
+        const newRestaurantWithId: Restaurant = {
+          restaurantId: `${Date.now()}`,
+          ...newRestaurantData
+        };
+
+        if (selectedFile) {
+          try {
+            const imageUrl = await uploadRestaurantImage(newRestaurantWithId.restaurantId, selectedFile);
+            newRestaurantWithId.imageUrl = imageUrl.data;
+          } catch (error) {
+            toast.error('Failed to upload image. Restaurant created without an image.');
+          }
+        }
+
+        setRestaurants(prev => [...prev, newRestaurantWithId]);
+        toast.success('Restaurant added successfully');
+
+      } catch (error) {
+        toast.error('Failed to create restaurant.');
+      }
     }
 
     setIsRestaurantDialogOpen(false);
   };
 
   const handleDeleteRestaurant = (id: string) => {
-    setRestaurants(prev => prev.filter(r => r.id !== id));
+    setRestaurants(prev => prev.filter(r => r.restaurantId !== id));
     setMenuItems(prev => prev.filter(m => m.restaurantId !== id));
     toast.success('Restaurant deleted successfully');
   };
@@ -103,37 +140,69 @@ export const AdminPage: React.FC = () => {
     setSelectedRestaurantId(restaurantId);
     setEditingMenuItem(null);
     setMenuItemForm({ name: '', description: '', price: '' });
+    setSelectedMenuItemFile(null);
     setIsMenuDialogOpen(true);
   };
 
-  const handleAddMenuItem = () => {
+  const handleAddMenuItem = async () => {
     if (!menuItemForm.name || !menuItemForm.description || !menuItemForm.price) {
       toast.error('Please fill in all fields');
       return;
     }
 
     if (editingMenuItem) {
+      const updatedMenuItem = { ...editingMenuItem, ...menuItemForm, price: parseFloat(menuItemForm.price) };
+      if (selectedMenuItemFile) {
+        try {
+          const imageUrl = await uploadMenuItemImage(editingMenuItem.id, selectedMenuItemFile);
+          updatedMenuItem.imageUrl = imageUrl.data;
+        } catch (error) {
+          toast.error('Failed to upload image');
+          return;
+        }
+      }
       setMenuItems(prev =>
         prev.map(m => m.id === editingMenuItem.id
-          ? { ...m, name: menuItemForm.name, description: menuItemForm.description, price: parseFloat(menuItemForm.price) }
+          ? updatedMenuItem
           : m
         )
       );
       toast.success('Menu item updated successfully');
     } else {
-      const newMenuItem: MenuItem = {
-        id: `m${Date.now()}`,
+      const newMenuItemData = {
         restaurantId: selectedRestaurantId,
         name: menuItemForm.name,
         description: menuItemForm.description,
-        price: parseFloat(menuItemForm.price)
+        price: parseFloat(menuItemForm.price),
+        imageUrl: '',
       };
-      setMenuItems(prev => [...prev, newMenuItem]);
-      toast.success('Menu item added successfully');
+
+      try {
+        const newMenuItemWithId: MenuItem = {
+          id: `m${Date.now()}`,
+          ...newMenuItemData
+        };
+
+        if (selectedMenuItemFile) {
+          try {
+            const imageUrl = await uploadMenuItemImage(newMenuItemWithId.id, selectedMenuItemFile);
+            newMenuItemWithId.imageUrl = imageUrl.data;
+          } catch (error) {
+            toast.error('Failed to upload image. Menu item created without an image.');
+          }
+        }
+
+        setMenuItems(prev => [...prev, newMenuItemWithId]);
+        toast.success('Menu item added successfully');
+
+      } catch (error) {
+        toast.error('Failed to create menu item.');
+      }
     }
 
     setMenuItemForm({ name: '', description: '', price: '' });
     setEditingMenuItem(null);
+    setSelectedMenuItemFile(null);
   };
 
   const handleEditMenuItem = (menuItem: MenuItem) => {
@@ -143,6 +212,7 @@ export const AdminPage: React.FC = () => {
       description: menuItem.description,
       price: menuItem.price.toString()
     });
+    setSelectedMenuItemFile(null);
   };
 
   const handleDeleteMenuItem = (id: string) => {
@@ -151,7 +221,7 @@ export const AdminPage: React.FC = () => {
   };
 
   const currentRestaurantMenuItems = menuItems.filter(m => m.restaurantId === selectedRestaurantId);
-  const currentRestaurant = restaurants.find(r => r.id === selectedRestaurantId);
+  const currentRestaurant = restaurants.find(r => r.restaurantId === selectedRestaurantId);
 
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
@@ -188,40 +258,39 @@ export const AdminPage: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {restaurants.map(restaurant => (
-                      <TableRow key={restaurant.id}>
-                        <TableCell>{restaurant.id}</TableCell>
-                        <TableCell>{restaurant.name}</TableCell>
-                        <TableCell>{restaurant.cuisineType}</TableCell>
-                        <TableCell>{restaurant.address}</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex gap-2 justify-end">
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleManageMenu(restaurant.id)}
-                            >
-                              Menu
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditRestaurant(restaurant)}
-                            >
-                              <Pencil className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteRestaurant(restaurant.id)}
-                            >
-                              <Trash2 className="h-4 w-4 text-red-500" />
-                            </Button>
-                          </div>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
+                                        {restaurants.map(restaurant => (
+                                          <TableRow key={restaurant.restaurantId}>
+                                            <TableCell>{restaurant.restaurantId}</TableCell>
+                                            <TableCell>{restaurant.name}</TableCell>
+                                            <TableCell>{restaurant.cuisineType}</TableCell>
+                                            <TableCell>{restaurant.address}</TableCell>
+                                            <TableCell className="text-right">
+                                              <div className="flex gap-2 justify-end">
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  onClick={() => handleManageMenu(restaurant.restaurantId)}
+                                                >
+                                                  Menu
+                                                </Button>
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  onClick={() => handleEditRestaurant(restaurant)}
+                                                >
+                                                  <Pencil className="h-4 w-4" />
+                                                </Button>
+                                                <Button
+                                                  size="sm"
+                                                  variant="outline"
+                                                  onClick={() => handleDeleteRestaurant(restaurant.restaurantId)}
+                                                >
+                                                  <Trash2 className="h-4 w-4 text-red-500" />
+                                                </Button>
+                                              </div>
+                                            </TableCell>
+                                          </TableRow>
+                                        ))}                  </TableBody>
                 </Table>
               </CardContent>
             </Card>
@@ -294,6 +363,14 @@ export const AdminPage: React.FC = () => {
                   onChange={(e) => setRestaurantForm(prev => ({ ...prev, address: e.target.value }))}
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="image">Image</Label>
+                <Input
+                  id="image"
+                  type="file"
+                  onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)}
+                />
+              </div>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsRestaurantDialogOpen(false)}>
@@ -346,6 +423,14 @@ export const AdminPage: React.FC = () => {
                       step="0.01"
                       value={menuItemForm.price}
                       onChange={(e) => setMenuItemForm(prev => ({ ...prev, price: e.target.value }))}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="menuItemImage">Image</Label>
+                    <Input
+                      id="menuItemImage"
+                      type="file"
+                      onChange={(e) => setSelectedMenuItemFile(e.target.files ? e.target.files[0] : null)}
                     />
                   </div>
                   <Button onClick={handleAddMenuItem} className="bg-green-600 hover:bg-green-700">

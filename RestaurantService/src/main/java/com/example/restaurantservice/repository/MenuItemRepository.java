@@ -1,0 +1,7 @@
+package com.example.restaurantservice.repository;
+
+import com.example.restaurantservice.entities.MenuItem;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface MenuItemRepository extends JpaRepository<MenuItem, Long> {
+}

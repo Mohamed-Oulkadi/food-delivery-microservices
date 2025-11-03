@@ -24,6 +24,25 @@ const userService = axios.create({
 export const getRestaurants = () => restaurantService.get<Restaurant[]>('');
 export const getRestaurantById = (id: string) => restaurantService.get<Restaurant>(`/${id}`);
 export const getMenuItems = (restaurantId: string) => restaurantService.get<MenuItem[]>(`/${restaurantId}/menu`);
+export const uploadRestaurantImage = (restaurantId: string, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return restaurantService.post<string>(`/${restaurantId}/image`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+export const uploadMenuItemImage = (menuItemId: string, file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  return restaurantService.post<string>(`/menu-items/${menuItemId}/image`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
 
 // Order Service
 export const createOrder = (order: Omit<Order, 'id' | 'status' | 'date'>) => orderService.post<Order>('/', order);

@@ -17,6 +17,7 @@ public class Restaurant {
 
     private String name;
     private String cuisineType;
+    private String imageUrl;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "menu_id", referencedColumnName = "menuId")

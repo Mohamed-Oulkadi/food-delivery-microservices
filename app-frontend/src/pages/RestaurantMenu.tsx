@@ -62,22 +62,13 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({ restaurantId, on
         </Button>
 
         {/* Restaurant Header */}
-        <div className="bg-white rounded-lg shadow-sm p-6 mb-8">
-          <div className="flex items-start justify-between">
-            <div>
-              <h1 className="text-gray-900 mb-2">{restaurant.name}</h1>
-              <p className="text-gray-600 mb-4">{restaurant.cuisineType}</p>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1">
-                  <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                  <span>{restaurant.rating} Rating</span>
-                </div>
-                <div className="flex items-center gap-1 text-gray-600">
-                  <MapPin className="h-4 w-4" />
-                  <span>{restaurant.address}</span>
-                </div>
-              </div>
-            </div>
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-8 flex items-center">
+          <div className="w-1/3 mr-6">
+            <img src={restaurant.imageUrl && !restaurant.imageUrl.startsWith('http') ? `http://localhost:8082${restaurant.imageUrl}` : restaurant.imageUrl} alt={restaurant.name} className="w-full h-auto rounded-lg" />
+          </div>
+          <div>
+            <h1 className="text-gray-900 mb-2">{restaurant.name}</h1>
+            <p className="text-gray-600 mb-4">{restaurant.cuisineType}</p>
           </div>
         </div>
 
@@ -87,22 +78,29 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({ restaurantId, on
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {menuItems.map(item => (
               <Card key={item.id} className="overflow-hidden">
-                <CardContent className="p-4">
-                  <div className="flex justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <h3 className="text-gray-900 mb-1">{item.name}</h3>
-                      <p className="text-gray-600 text-sm mb-3">{item.description}</p>
-                      <p className="text-green-600">${item.price.toFixed(2)}</p>
-                    </div>
-                    <Button
-                      className="bg-green-600 hover:bg-green-700 shrink-0"
-                      onClick={() => handleAddToCart(item)}
-                    >
-                      <ShoppingCart className="h-4 w-4 mr-2" />
-                      Add
-                    </Button>
+                <div className="flex">
+                  <div className="w-1/3">
+                    {item.imageUrl && <img src={item.imageUrl && !item.imageUrl.startsWith('http') ? `http://localhost:8082${item.imageUrl}` : item.imageUrl} alt={item.name} className="w-full h-full object-cover" />}
                   </div>
-                </CardContent>
+                  <div className="w-2/3">
+                    <CardContent className="p-4">
+                      <div className="flex justify-between items-start gap-4">
+                        <div className="flex-1">
+                          <h3 className="text-gray-900 mb-1">{item.name}</h3>
+                          <p className="text-gray-600 text-sm mb-3">{item.description}</p>
+                          <p className="text-green-600">${item.price.toFixed(2)}</p>
+                        </div>
+                        <Button
+                          className="bg-green-600 hover:bg-green-700 shrink-0"
+                          onClick={() => handleAddToCart(item)}
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-2" />
+                          Add
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </div>
+                </div>
               </Card>
             ))}
           </div>

@@ -11,6 +11,7 @@ import {
 } from '../components/ui/select';
 import { getRestaurants } from '../services/api';
 import { Restaurant } from '../lib/mockData';
+
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
 interface CustomerHomeProps {
@@ -84,13 +85,13 @@ export const CustomerHome: React.FC<CustomerHomeProps> = ({ onNavigate }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRestaurants.map(restaurant => (
             <Card
-              key={restaurant.id}
+              key={restaurant.restaurantId}
               className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => onNavigate('restaurant', restaurant.id)}
+              onClick={() => onNavigate('restaurant', restaurant.restaurantId)}
             >
               <div className="aspect-[16/9] overflow-hidden bg-gray-200">
                 <ImageWithFallback
-                  src={restaurant.image}
+                  src={restaurant.imageUrl}
                   alt={restaurant.name}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
                 />
@@ -98,16 +99,6 @@ export const CustomerHome: React.FC<CustomerHomeProps> = ({ onNavigate }) => {
               <CardContent className="p-4">
                 <h3 className="text-gray-900 mb-1">{restaurant.name}</h3>
                 <p className="text-gray-600 text-sm mb-3">{restaurant.cuisineType}</p>
-                <div className="flex items-center justify-between text-sm">
-                  <div className="flex items-center gap-1 text-gray-700">
-                    <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-                    <span>{restaurant.rating}</span>
-                  </div>
-                  <div className="flex items-center gap-1 text-gray-600">
-                    <Clock className="h-4 w-4" />
-                    <span>{restaurant.deliveryTime}</span>
-                  </div>
-                </div>
               </CardContent>
             </Card>
           ))}
