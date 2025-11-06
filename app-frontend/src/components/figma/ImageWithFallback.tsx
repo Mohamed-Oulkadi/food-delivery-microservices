@@ -12,7 +12,10 @@ export function ImageWithFallback(props: React.ImgHTMLAttributes<HTMLImageElemen
 
   const { src, alt, style, className, ...rest } = props
 
-  const fullSrc = src && !src.startsWith('http') ? `http://localhost:8082${src}` : src;
+  // Allow overriding backend base URL via Vite env variable VITE_API_BASE_URL.
+  // If not set, we use an empty string so dev proxy (vite) can forward `/images` requests.
+  const API_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? '';
+  const fullSrc = src && !src.startsWith('http') ? `${API_BASE}${src}` : src;
 
   return didError ? (
     <div

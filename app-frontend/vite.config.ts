@@ -53,8 +53,42 @@
       target: 'esnext',
       outDir: 'build',
     },
+    // Dev server config: port, open and proxy for images
     server: {
       port: 3000,
       open: true,
+      // Dev proxy so frontend can request `/images/*` and service-specific
+      // `/api/...` endpoints without hardcoding backend hosts in code.
+      proxy: {
+        '/images': {
+          target: 'http://localhost:8082',
+          changeOrigin: true,
+          secure: false,
+        },
+        // Restaurant service
+        '/api/restaurants': {
+          target: 'http://localhost:8082',
+          changeOrigin: true,
+          secure: false,
+        },
+        // Orders
+        '/api/orders': {
+          target: 'http://localhost:8081',
+          changeOrigin: true,
+          secure: false,
+        },
+        // Deliveries
+        '/api/deliveries': {
+          target: 'http://localhost:8083',
+          changeOrigin: true,
+          secure: false,
+        },
+        // Users
+        '/api/users': {
+          target: 'http://localhost:8084',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
   });

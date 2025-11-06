@@ -2,22 +2,28 @@
 import axios from 'axios';
 import { Restaurant, MenuItem, Order, User, Delivery } from '../lib/mockData';
 
-const API_BASE_URL = 'http://localhost';
+// Use per-service base URLs. Each can be overridden via Vite env vars:
+// VITE_RESTAURANT_BASE, VITE_ORDER_BASE, VITE_DELIVERY_BASE, VITE_USER_BASE
+const env = (import.meta as any).env ?? {};
+const RESTAURANT_BASE = env.VITE_RESTAURANT_BASE ?? 'http://localhost:8082';
+const ORDER_BASE = env.VITE_ORDER_BASE ?? 'http://localhost:8081';
+const DELIVERY_BASE = env.VITE_DELIVERY_BASE ?? 'http://localhost:8083';
+const USER_BASE = env.VITE_USER_BASE ?? 'http://localhost:8084';
 
 const restaurantService = axios.create({
-  baseURL: `${API_BASE_URL}:8082/api/restaurants`,
+  baseURL: `${RESTAURANT_BASE}/api/restaurants`,
 });
 
 const orderService = axios.create({
-  baseURL: `${API_BASE_URL}:8081/api/orders`,
+  baseURL: `${ORDER_BASE}/api/orders`,
 });
 
 const deliveryService = axios.create({
-  baseURL: `${API_BASE_URL}:8083/api/deliveries`,
+  baseURL: `${DELIVERY_BASE}/api/deliveries`,
 });
 
 const userService = axios.create({
-  baseURL: `${API_BASE_URL}:8084/api/users`,
+  baseURL: `${USER_BASE}/api/users`,
 });
 
 // Restaurant Service

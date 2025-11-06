@@ -18,8 +18,16 @@ public class Restaurant {
     private String name;
     private String cuisineType;
     private String imageUrl;
+    private Double rating;
+    private String deliveryTime;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "menu_id", referencedColumnName = "menuId")
     private Menu menu;
+
+    public Restaurant(String name, String cuisineType, String imageUrl) {
+        this.name = name;
+        this.cuisineType = cuisineType;
+        this.imageUrl = imageUrl;
+    }
 }

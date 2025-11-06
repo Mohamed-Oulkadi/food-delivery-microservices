@@ -10,7 +10,8 @@ import {
   SelectValue,
 } from '../components/ui/select';
 import { getRestaurants } from '../services/api';
-import { Restaurant } from '../lib/mockData';
+import { Restaurant, mockRestaurants } from '../lib/mockData';
+import { toast } from 'sonner';
 
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
@@ -30,6 +31,9 @@ export const CustomerHome: React.FC<CustomerHomeProps> = ({ onNavigate }) => {
         setRestaurants(response.data);
       } catch (error) {
         console.error('Failed to fetch restaurants', error);
+        // Fallback to local mock data so the UI is usable when backend is down
+        setRestaurants(mockRestaurants);
+        toast.error('Could not load restaurants from backend — showing mock data');
       }
     };
     fetchRestaurants();
@@ -99,6 +103,13 @@ export const CustomerHome: React.FC<CustomerHomeProps> = ({ onNavigate }) => {
               <CardContent className="p-4">
                 <h3 className="text-gray-900 mb-1">{restaurant.name}</h3>
                 <p className="text-gray-600 text-sm mb-3">{restaurant.cuisineType}</p>
+                <div className="flex items-center text-sm text-gray-600">
+                  <Star className="h-4 w-4 mr-1 text-yellow-500" />
+                  <span>{typeof restaurant.rating === 'number' ? restaurant.rating.toFixed(1) : '—'}</span>
+                  <span className="mx-2">•</span>
+                  <Clock className="h-4 w-4 mr-1" />
+                  <span>{restaurant.deliveryTime ?? 'N/A'}</span>
+                </div>
               </CardContent>
             </Card>
           ))}

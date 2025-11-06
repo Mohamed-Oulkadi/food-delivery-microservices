@@ -7,4 +7,6 @@ public class RestaurantDto {
     private String name;
     private String cuisineType;
     private String imageUrl;
+    private Double rating;
+    private String deliveryTime;
 }
