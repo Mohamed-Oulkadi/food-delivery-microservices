@@ -33,7 +33,15 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
       const response = await api.login({ username, password });
-      setUser(response.data);
+      // Map backend UserDto (userId) to frontend User (id)
+      const dto = response.data as any;
+      const mappedUser = {
+        id: dto.userId ? String(dto.userId) : dto.id ?? dto.username,
+        username: dto.username,
+        email: dto.email,
+        role: dto.role || 'ROLE_CUSTOMER'
+      };
+      setUser(mappedUser);
       return true;
     } catch (error) {
       console.error('Login failed', error);
@@ -48,7 +56,12 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
 
   const register = async (username: string, email: string, password: string, role: string): Promise<boolean> => {
     try {
-      await api.register({ username, email, password, role });
+      const response = await api.register({ username, email, password, role });
+      // Optionally set user after registration
+      const dto = (response as any).data;
+      if (dto) {
+        setUser({ id: dto.userId ? String(dto.userId) : dto.id ?? username, username: dto.username, email: dto.email, role: dto.role });
+      }
       return true;
     } catch (error) {
       console.error('Registration failed', error);

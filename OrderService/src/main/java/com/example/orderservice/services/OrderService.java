@@ -23,8 +23,21 @@ public class OrderService {
     @Transactional
     public Order createOrder(OrderRequestDto orderRequest) {
         Order order = new Order();
-        order.setUserId(orderRequest.getUserId());
-        order.setRestaurantId(orderRequest.getRestaurantId());
+        // Parse IDs which may come as strings from the frontend
+        try {
+            if (orderRequest.getCustomerId() != null) {
+                order.setUserId(orderRequest.getCustomerId());
+            }
+        } catch (NumberFormatException ex) {
+            // ignore — leave as null or handle differently if needed
+        }
+        try {
+            if (orderRequest.getRestaurantId() != null) {
+                order.setRestaurantId(orderRequest.getRestaurantId());
+            }
+        } catch (NumberFormatException ex) {
+            // ignore
+        }
         order.setStatus(OrderStatus.PLACED);
 
         List<OrderItem> orderItems = new ArrayList<>();
@@ -35,9 +48,15 @@ public class OrderService {
             // to verify the price, but we trust the DTO for simplicity.
 
             OrderItem item = new OrderItem();
-            item.setMenuItemId(itemDto.getMenuItemId());
+            try {
+                if (itemDto.getMenuItemId() != null) {
+                    item.setMenuItemId(itemDto.getMenuItemId());
+                }
+            } catch (NumberFormatException ex) {
+                // ignore
+            }
             item.setQuantity(itemDto.getQuantity());
-            item.setPrice(itemDto.getPrice());
+            item.setPrice(itemDto.getPrice() != null ? itemDto.getPrice() : 0.0);
             item.setOrder(order); // Link item to the order
 
             orderItems.add(item);
@@ -53,5 +72,15 @@ public class OrderService {
     public Order getOrderById(Long orderId) {
         return orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
+    }
+
+    // Return all orders (useful for quick testing / admin views)
+    public List<Order> getAllOrders() {
+        return orderRepository.findAll();
+    }
+
+    public List<Order> getOrdersByCustomer(Long customerId) {
+        if (customerId == null) return List.of();
+        return orderRepository.findByUserId(customerId);
     }
 }

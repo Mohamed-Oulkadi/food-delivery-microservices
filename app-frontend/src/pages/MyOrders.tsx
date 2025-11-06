@@ -14,7 +14,6 @@ import { useApp } from '../contexts/AppContext';
 
 interface EnrichedOrder extends Order {
   restaurant?: Restaurant;
-  enrichedItems?: (Order['items'][0] & { menuItem?: MenuItem })[];
 }
 
 const getStatusIcon = (status: string) => {
@@ -44,7 +43,7 @@ export const MyOrders: React.FC = () => {
   const [orders, setOrders] = useState<EnrichedOrder[]>([]);
 
   useEffect(() => {
-    if (user) {
+    if (user && user.id) {
       const fetchOrders = async () => {
         try {
           const response = await getMyOrders(user.id);
@@ -52,12 +51,7 @@ export const MyOrders: React.FC = () => {
 
           const enrichedOrders = await Promise.all(ordersData.map(async (order) => {
             const restaurant = await getRestaurantById(order.restaurantId).then(res => res.data);
-            const menuItems = await getMenuItems(order.restaurantId).then(res => res.data);
-            const enrichedItems = order.items.map(item => ({
-              ...item,
-              menuItem: menuItems.find(mi => mi.id === item.menuItemId)
-            }));
-            return { ...order, restaurant, enrichedItems };
+            return { ...order, restaurant };
           }));
 
           setOrders(enrichedOrders);
@@ -86,7 +80,9 @@ export const MyOrders: React.FC = () => {
           </Card>
         ) : (
           <Accordion type="single" collapsible className="space-y-4">
-            {orders.map(order => (
+            {orders.map(order => {
+              console.log('order:', order);
+              return (
               <AccordionItem key={order.id} value={order.id} className="border-none">
                 <Card>
                   <CardHeader>
@@ -112,17 +108,16 @@ export const MyOrders: React.FC = () => {
                       <div className="border-t pt-4">
                         <h4 className="text-gray-900 mb-3">Order Items</h4>
                         <div className="space-y-2">
-                          {order.enrichedItems?.map((item, idx) => {
-                            if (!item.menuItem) return null;
-                            
+                          {order.items?.map((item, idx) => {
+                            console.log('item:', item);
                             return (
                               <div key={idx} className="flex justify-between items-center py-2 border-b last:border-0">
                                 <div>
-                                  <p className="text-gray-900">{item.menuItem.name}</p>
+                                  <p className="text-gray-900">Menu Item #{item.menuItemId}</p>
                                   <p className="text-sm text-gray-600">Quantity: {item.quantity}</p>
                                 </div>
                                 <p className="text-gray-900">
-                                  ${(item.menuItem.price * item.quantity).toFixed(2)}
+                                  ${(item.price * item.quantity).toFixed(2)}
                                 </p>
                               </div>
                             );
@@ -133,8 +128,7 @@ export const MyOrders: React.FC = () => {
                   </AccordionContent>
                 </Card>
               </AccordionItem>
-            ))}
-          </Accordion>
+            )})}          </Accordion>
         )}
       </div>
     </div>

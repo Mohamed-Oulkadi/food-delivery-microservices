@@ -1,9 +1,9 @@
 ### GET request to example server
-GET http://localhost:8081
+GET http://localhost:8081/api/orders
 
 ###
 
-POST http://localhost:8081/orders
+POST http://localhost:8081/api/orders
 Content-Type: application/json
 
 {
