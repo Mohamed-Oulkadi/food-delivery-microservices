@@ -16,6 +16,11 @@ services:
     networks:
       - expressfood-network
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d restau_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres_order:
     image: postgres:17
@@ -31,6 +36,11 @@ services:
     networks:
       - expressfood-network
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d order_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres_delivery:
     image: postgres:17
@@ -46,6 +56,11 @@ services:
     networks:
       - expressfood-network
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d delivery_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres_user:
     image: postgres:17
@@ -61,6 +76,11 @@ services:
     networks:
       - expressfood-network
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d user_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   # 2. Backends
   backend-restaurant:
@@ -70,7 +90,8 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - postgres_restaurant
+      postgres_restaurant:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_restaurant:5432/restau_db
       SPRING_DATASOURCE_USERNAME: postgres
@@ -86,7 +107,8 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - postgres_order
+      postgres_order:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_order:5432/order_db
       SPRING_DATASOURCE_USERNAME: postgres
@@ -102,7 +124,8 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - postgres_delivery
+      postgres_delivery:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_delivery:5432/delivery_db
       SPRING_DATASOURCE_USERNAME: postgres
@@ -118,7 +141,8 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - postgres_user
+      postgres_user:
+        condition: service_healthy
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres_user:5432/user_db
       SPRING_DATASOURCE_USERNAME: postgres

@@ -25,7 +25,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
   const [role, setRole] = useState('ROLE_CUSTOMER');
   const { register } = useApp();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!username || !email || !password || !confirmPassword) {
@@ -38,7 +38,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
       return;
     }
 
-    const success = register(username, email, password, role);
+    const success = await register(username, email, password, role);
     if (success) {
       toast.success('Registration successful!');
       onNavigate('login');

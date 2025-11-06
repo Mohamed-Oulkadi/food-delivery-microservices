@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus, Pencil, Trash2, LayoutDashboard } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -21,13 +21,39 @@ import {
   TableRow,
 } from '../components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { mockRestaurants, mockMenuItems, mockUsers, Restaurant, MenuItem } from '../lib/mockData';
-import { uploadRestaurantImage, uploadMenuItemImage } from '../services/api';
+import { mockUsers, Restaurant, MenuItem } from '../lib/mockData';
+import { getRestaurants, getMenuItems, uploadRestaurantImage, uploadMenuItemImage } from '../services/api';
 import { toast } from 'sonner@2.0.3';
 
 export const AdminPage: React.FC = () => {
-  const [restaurants, setRestaurants] = useState<Restaurant[]>(mockRestaurants);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>(mockMenuItems);
+  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
+  
+  useEffect(() => {
+    const fetchRestaurants = async () => {
+      try {
+        const response = await getRestaurants();
+        setRestaurants(response.data);
+      } catch (error) {
+        console.error('Failed to fetch restaurants', error);
+      }
+    };
+    fetchRestaurants();
+  }, []);
+
+  useEffect(() => {
+    const fetchMenuItems = async () => {
+      if (selectedRestaurantId) {
+        try {
+          const response = await getMenuItems(selectedRestaurantId);
+          setMenuItems(response.data);
+        } catch (error) {
+          console.error('Failed to fetch menu items', error);
+        }
+      }
+    };
+    fetchMenuItems();
+  }, [selectedRestaurantId]);
   
   const [isRestaurantDialogOpen, setIsRestaurantDialogOpen] = useState(false);
   const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);

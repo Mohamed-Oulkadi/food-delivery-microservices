@@ -13,9 +13,10 @@ import { useApp } from '../contexts/AppContext';
 interface HeaderProps {
   onNavigate: (page: string) => void;
   onOpenCart: () => void;
+  currentPage?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onNavigate, onOpenCart }) => {
+export const Header: React.FC<HeaderProps> = ({ onNavigate, onOpenCart, currentPage }) => {
   const { user, logout, cartItemCount } = useApp();
 
   return (
@@ -30,7 +31,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onOpenCart }) => {
 
           {/* Center Navigation */}
           <nav className="hidden md:flex items-center gap-6">
-            {!user && (
+            {!user && currentPage !== 'login' && (
               <Button variant="ghost" onClick={() => onNavigate('home')}>
                 Home
               </Button>
@@ -61,7 +62,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onOpenCart }) => {
                     )}
                   </Button>
                 )}
-                
+
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="flex items-center gap-2">
@@ -72,12 +73,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onOpenCart }) => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
-                    {user.role === 'ROLE_CUSTOMER' && (
-                      <DropdownMenuItem onClick={() => onNavigate('my-orders')}>
-                        <Package className="mr-2 h-4 w-4" />
-                        My Orders
-                      </DropdownMenuItem>
-                    )}
+                    
                     {user.role === 'ROLE_ADMIN' && (
                       <DropdownMenuItem onClick={() => onNavigate('admin')}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
@@ -90,7 +86,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onOpenCart }) => {
                         Dashboard
                       </DropdownMenuItem>
                     )}
-                    <DropdownMenuItem onClick={logout}>
+                    <DropdownMenuItem onClick={() => { logout(); onNavigate('login'); }}>
                       <LogOut className="mr-2 h-4 w-4" />
                       Logout
                     </DropdownMenuItem>

@@ -35,7 +35,16 @@ public class DataInitializer implements CommandLineRunner {
             customerRequest.setRole("ROLE_CUSTOMER");
             userService.createUser(customerRequest);
 
-            System.out.println("User database seeded with 2 users.");
+            // Create a Customer Driver
+            CreateUserRequestDto driverRequest = new CreateUserRequestDto();
+            driverRequest.setUsername("driver");
+            driverRequest.setEmail("driver@example.com");
+            driverRequest.setPassword("driver123");
+            driverRequest.setRole("ROLE_DRIVER");
+            userService.createUser(driverRequest);
+
+
+            System.out.println("User database seeded with 3 users.");
         }
     }
 }

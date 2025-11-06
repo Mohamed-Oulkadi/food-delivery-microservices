@@ -15,7 +15,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
   const [password, setPassword] = useState('');
   const { login } = useApp();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!username || !password) {
@@ -23,12 +23,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
       return;
     }
 
-    const success = login(username, password);
+    const success = await login(username, password);
     if (success) {
       toast.success('Login successful!');
       onNavigate('home');
     } else {
-      toast.error('Invalid credentials. Try: customer/password, admin/password, or driver/password');
+      toast.error('Invalid credentials. Try: customer/customer123, admin/admin123, or driver/driver123');
     }
   };
 
@@ -81,9 +81,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
             <div className="mt-4 p-4 bg-gray-100 rounded-lg text-sm">
               <p className="text-gray-700 mb-2">Demo credentials:</p>
               <ul className="space-y-1 text-gray-600">
-                <li>Customer: customer / password</li>
-                <li>Admin: admin / password</li>
-                <li>Driver: driver / password</li>
+                <li>Customer: customer / customer123</li>
+                <li>Admin: admin / admin123</li>
+                <li>Driver: driver / driver123</li>
               </ul>
             </div>
           </form>

@@ -45,7 +45,7 @@ const AppContent = () => {
         setRoute({ page: 'home' });
       }
     }
-  }, [user]);
+  }, [user, route]);
 
   const handleNavigate = (page: string, restaurantId?: string) => {
     setRoute({ page: page as Route['page'], restaurantId });
@@ -87,7 +87,7 @@ const AppContent = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onNavigate={handleNavigate} onOpenCart={handleOpenCart} />
+      <Header onNavigate={handleNavigate} onOpenCart={handleOpenCart} currentPage={route.page} />
       {renderPage()}
       {user?.role === 'ROLE_CUSTOMER' && (
         <CartSheet open={isCartOpen} onOpenChange={setIsCartOpen} />
