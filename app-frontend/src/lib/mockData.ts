@@ -41,8 +41,8 @@ export interface Delivery {
   driverId?: string;
 }
 
-export interface User {
-  id: string;
+export interface UserDto {
+  userId: number;
   username: string;
   email: string;
   role: 'ROLE_CUSTOMER' | 'ROLE_ADMIN' | 'ROLE_DRIVER';
@@ -143,8 +143,4 @@ export const mockMenuItems: MenuItem[] = [
   { id: 'm24', restaurantId: '6', name: 'Fried Rice', description: 'Classic fried rice with egg and vegetables', price: 7.99, imageUrl: '' }
 ];
 
-export const mockUsers: User[] = [
-  { id: 'u1', username: 'customer1', email: 'customer@example.com', role: 'ROLE_CUSTOMER' },
-  { id: 'u2', username: 'admin', email: 'admin@example.com', role: 'ROLE_ADMIN' },
-  { id: 'u3', username: 'driver1', email: 'driver@example.com', role: 'ROLE_DRIVER' }
-];
+export const mockUsers: UserDto[] = [];

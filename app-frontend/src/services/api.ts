@@ -1,6 +1,6 @@
 
 import axios from 'axios';
-import { Restaurant, MenuItem, Order, User, Delivery } from '../lib/mockData';
+import { Restaurant, MenuItem, Order, UserDto, Delivery } from '../lib/mockData';
 
 // Use per-service base URLs. Each can be overridden via Vite env vars:
 // VITE_RESTAURANT_BASE, VITE_ORDER_BASE, VITE_DELIVERY_BASE, VITE_USER_BASE
@@ -60,7 +60,9 @@ export const getDeliveryStatus = (orderId: string) => deliveryService.get<Delive
 export const updateDeliveryStatus = (id: string, status: string) => deliveryService.put<Delivery>(`/${id}/status`, { status });
 
 // User Service
-export const login = (credentials: {username: string, password: string}) => userService.post<User>('/login', credentials);
-export const register = (userData: Omit<User, 'id'>) => userService.post<User>('/register', userData);
-export const getUserById = (id: string) => userService.get<User>(`/${id}`);
-
+export const login = (credentials: {username: string, password: string}) => userService.post<UserDto>('/login', credentials);
+export const register = (userData: Omit<UserDto, 'id'>) => userService.post<UserDto>('/register', userData);
+export const getUsers = () => userService.get<UserDto[]>('');
+export const getUserById = (id: string) => userService.get<UserDto>(`/${id}`);
+export const updateUser = (id: number, userData: UserDto) => userService.put<UserDto>(`/${id}`, userData);
+export const deleteUser = (id: number) => userService.delete(`/${id}`);

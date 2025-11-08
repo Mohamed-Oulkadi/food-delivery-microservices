@@ -21,14 +21,25 @@ import {
   TableRow,
 } from '../components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
-import { mockUsers, Restaurant, MenuItem } from '../lib/mockData';
-import { getRestaurants, getMenuItems, uploadRestaurantImage, uploadMenuItemImage } from '../services/api';
+import { Restaurant, MenuItem, UserDto } from '../lib/mockData';
+import { getRestaurants, getMenuItems, uploadRestaurantImage, uploadMenuItemImage, getUsers, updateUser, deleteUser } from '../services/api';
 import { toast } from 'sonner@2.0.3';
 
 export const AdminPage: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  
+  const [users, setUsers] = useState<UserDto[]>([]);
+
+  // Fixed: Add all missing state variables
+  const [isRestaurantDialogOpen, setIsRestaurantDialogOpen] = useState(false);
+  const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
+  const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
+  const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<UserDto | null>(null);
+
+  const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>('');
+
   useEffect(() => {
     const fetchRestaurants = async () => {
       try {
@@ -39,6 +50,19 @@ export const AdminPage: React.FC = () => {
       }
     };
     fetchRestaurants();
+  }, []);
+
+  useEffect(() => {
+    // Fixed: Add useEffect to fetch users on mount
+    const fetchUsers = async () => {
+      try {
+        const response = await getUsers();
+        setUsers(response.data);
+      } catch (error) {
+        console.error('Failed to fetch users', error);
+      }
+    };
+    fetchUsers();
   }, []);
 
   useEffect(() => {
@@ -54,12 +78,6 @@ export const AdminPage: React.FC = () => {
     };
     fetchMenuItems();
   }, [selectedRestaurantId]);
-  
-  const [isRestaurantDialogOpen, setIsRestaurantDialogOpen] = useState(false);
-  const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
-  const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
-  const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
-  const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>('');
 
   // Restaurant form state
   const [restaurantForm, setRestaurantForm] = useState({
@@ -75,6 +93,13 @@ export const AdminPage: React.FC = () => {
     name: '',
     description: '',
     price: ''
+  });
+
+  // User form state
+  const [userForm, setUserForm] = useState({
+    username: '',
+    email: '',
+    role: ''
   });
 
   const handleAddRestaurant = () => {
@@ -120,17 +145,14 @@ export const AdminPage: React.FC = () => {
       );
       toast.success('Restaurant updated successfully');
     } else {
-      // First create the restaurant to get an ID
       const newRestaurantData = {
         ...restaurantForm,
-        imageUrl: '', // temporary empty
-        rating: 4.5, // default rating
-        deliveryTime: '30-40 min' // default time
+        imageUrl: '',
+        rating: 4.5,
+        deliveryTime: '30-40 min'
       };
 
       try {
-        // This is a mock implementation. In a real app, you would post to your API
-        // and get the created restaurant back with its new ID.
         const newRestaurantWithId: Restaurant = {
           restaurantId: `${Date.now()}`,
           ...newRestaurantData
@@ -246,6 +268,39 @@ export const AdminPage: React.FC = () => {
     toast.success('Menu item deleted successfully');
   };
 
+  const handleEditUser = (user: UserDto) => {
+    setEditingUser(user);
+    setUserForm({
+      username: user.username,
+      email: user.email,
+      role: user.role
+    });
+    setIsUserDialogOpen(true);
+  };
+
+  const handleSaveUser = async () => {
+    if (!editingUser) return;
+
+    try {
+      const updatedUser = await updateUser(editingUser.userId, { ...editingUser, ...userForm });
+      setUsers(prev => prev.map(u => u.userId === editingUser.userId ? updatedUser.data : u));
+      toast.success('User updated successfully');
+      setIsUserDialogOpen(false);
+    } catch (error) {
+      toast.error('Failed to update user');
+    }
+  };
+
+  const handleDeleteUser = async (id: number) => {
+    try {
+      await deleteUser(id);
+      setUsers(prev => prev.filter(u => u.userId !== id));
+      toast.success('User deleted successfully');
+    } catch (error) {
+      toast.error('Failed to delete user');
+    }
+  };
+
   const currentRestaurantMenuItems = menuItems.filter(m => m.restaurantId === selectedRestaurantId);
   const currentRestaurant = restaurants.find(r => r.restaurantId === selectedRestaurantId);
 
@@ -254,7 +309,7 @@ export const AdminPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center gap-3 mb-8">
           <LayoutDashboard className="h-8 w-8 text-green-600" />
-          <h1 className="text-gray-900">Admin Panel</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
         </div>
 
         <Tabs defaultValue="restaurants" className="space-y-6">
@@ -284,39 +339,40 @@ export const AdminPage: React.FC = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                                        {restaurants.map(restaurant => (
-                                          <TableRow key={restaurant.restaurantId}>
-                                            <TableCell>{restaurant.restaurantId}</TableCell>
-                                            <TableCell>{restaurant.name}</TableCell>
-                                            <TableCell>{restaurant.cuisineType}</TableCell>
-                                            <TableCell>{restaurant.address}</TableCell>
-                                            <TableCell className="text-right">
-                                              <div className="flex gap-2 justify-end">
-                                                <Button
-                                                  size="sm"
-                                                  variant="outline"
-                                                  onClick={() => handleManageMenu(restaurant.restaurantId)}
-                                                >
-                                                  Menu
-                                                </Button>
-                                                <Button
-                                                  size="sm"
-                                                  variant="outline"
-                                                  onClick={() => handleEditRestaurant(restaurant)}
-                                                >
-                                                  <Pencil className="h-4 w-4" />
-                                                </Button>
-                                                <Button
-                                                  size="sm"
-                                                  variant="outline"
-                                                  onClick={() => handleDeleteRestaurant(restaurant.restaurantId)}
-                                                >
-                                                  <Trash2 className="h-4 w-4 text-red-500" />
-                                                </Button>
-                                              </div>
-                                            </TableCell>
-                                          </TableRow>
-                                        ))}                  </TableBody>
+                    {restaurants.map(restaurant => (
+                      <TableRow key={restaurant.restaurantId}>
+                        <TableCell>{restaurant.restaurantId}</TableCell>
+                        <TableCell>{restaurant.name}</TableCell>
+                        <TableCell>{restaurant.cuisineType}</TableCell>
+                        <TableCell>{restaurant.address}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleManageMenu(restaurant.restaurantId)}
+                            >
+                              Menu
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditRestaurant(restaurant)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteRestaurant(restaurant.restaurantId)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
                 </Table>
               </CardContent>
             </Card>
@@ -335,15 +391,34 @@ export const AdminPage: React.FC = () => {
                       <TableHead>Username</TableHead>
                       <TableHead>Email</TableHead>
                       <TableHead>Role</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {mockUsers.map(user => (
-                      <TableRow key={user.id}>
-                        <TableCell>{user.id}</TableCell>
+                    {users.map(user => (
+                      <TableRow key={user.userId}>
+                        <TableCell>{user.userId}</TableCell>
                         <TableCell>{user.username}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.role.replace('ROLE_', '')}</TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex gap-2 justify-end">
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleEditUser(user)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleDeleteUser(user.userId)}
+                            >
+                              <Trash2 className="h-4 w-4 text-red-500" />
+                            </Button>
+                          </div>
+                        </TableCell>
                       </TableRow>
                     ))}
                   </TableBody>
@@ -409,6 +484,49 @@ export const AdminPage: React.FC = () => {
           </DialogContent>
         </Dialog>
 
+        {/* User Dialog */}
+        <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Edit User</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="username">Username</Label>
+                <Input
+                  id="username"
+                  value={userForm.username}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, username: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  value={userForm.email}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, email: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="role">Role</Label>
+                <Input
+                  id="role"
+                  value={userForm.role}
+                  onChange={(e) => setUserForm(prev => ({ ...prev, role: e.target.value }))}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsUserDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button onClick={handleSaveUser} className="bg-green-600 hover:bg-green-700">
+                Save
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+
         {/* Menu Dialog */}
         <Dialog open={isMenuDialogOpen} onOpenChange={setIsMenuDialogOpen}>
           <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -467,7 +585,7 @@ export const AdminPage: React.FC = () => {
               </Card>
 
               <div>
-                <h4 className="mb-4">Current Menu Items</h4>
+                <h4 className="font-semibold text-lg mb-4">Current Menu Items</h4>
                 <div className="space-y-2">
                   {currentRestaurantMenuItems.map(item => (
                     <div key={item.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
@@ -500,7 +618,6 @@ export const AdminPage: React.FC = () => {
                 </div>
               </div>
             </div>
-
             <DialogFooter>
               <Button onClick={() => setIsMenuDialogOpen(false)}>Close</Button>
             </DialogFooter>

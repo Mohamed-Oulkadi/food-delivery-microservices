@@ -1,23 +1,44 @@
 ### GET request to example server
-GET http://localhost:8082/restaurants
+GET http://localhost:8082/api/restaurants
 
 ###
-
-POST http://localhost:8082/restaurants
+POST http://localhost:8082/api/restaurants
 Content-Type: application/json
 
 {
-  "name": "Pizza Palace",
-  "cuisineType": "Italian"
-}
-###
-
-POST http://localhost:8082/restaurants/13ef46b8-b31f-493b-b39a-e12566d4b75d/menu/items
-Content-Type: application/json
-
-{
-  "name": "Margherita Pizza",
-  "description": "Classic cheese and tomato",
-  "price": 12.50,
-  "isAvailable": true
+  "restaurantId": 5,
+  "name": "example",
+  "cuisineType": "Italian",
+  "imageUrl": "/images/amici-italian.svg",
+  "rating": 4.5,
+  "deliveryTime": "30-40 min",
+  "menu": {
+    "menuId": 1,
+    "items": [
+      {
+        "menuItemId": 1,
+        "name": "Margherita Pizza",
+        "description": "Classic tomato, mozzarella, basil",
+        "price": 12.5,
+        "imageUrl": "/images/menu/margherita-pizza.svg",
+        "available": true
+      },
+      {
+        "menuItemId": 2,
+        "name": "Spaghetti Carbonara",
+        "description": "Pasta with egg, cheese, and pancetta",
+        "price": 15.0,
+        "imageUrl": "/images/menu/spaghetti-carbonara.svg",
+        "available": true
+      },
+      {
+        "menuItemId": 3,
+        "name": "Lasagna",
+        "description": "Layers of pasta, meat sauce, and cheese",
+        "price": 14.0,
+        "imageUrl": "/images/menu/lasagna.svg",
+        "available": true
+      }
+    ]
+  }
 }

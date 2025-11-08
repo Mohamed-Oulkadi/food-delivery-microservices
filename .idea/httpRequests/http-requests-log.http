@@ -1,3 +1,173 @@
+GET http://localhost:8082/api/restaurants
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2025-11-07T174222.200.json
+
+###
+
+POST http://localhost:8082/api/restaurants
+Content-Type: application/json
+Content-Length: 946
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "restaurantId": 5,
+  "name": "example",
+  "cuisineType": "Italian",
+  "imageUrl": "/images/amici-italian.svg",
+  "rating": 4.5,
+  "deliveryTime": "30-40 min",
+  "menu": {
+    "menuId": 1,
+    "items": [
+      {
+        "menuItemId": 1,
+        "name": "Margherita Pizza",
+        "description": "Classic tomato, mozzarella, basil",
+        "price": 12.5,
+        "imageUrl": "/images/menu/margherita-pizza.svg",
+        "available": true
+      },
+      {
+        "menuItemId": 2,
+        "name": "Spaghetti Carbonara",
+        "description": "Pasta with egg, cheese, and pancetta",
+        "price": 15.0,
+        "imageUrl": "/images/menu/spaghetti-carbonara.svg",
+        "available": true
+      },
+      {
+        "menuItemId": 3,
+        "name": "Lasagna",
+        "description": "Layers of pasta, meat sauce, and cheese",
+        "price": 14.0,
+        "imageUrl": "/images/menu/lasagna.svg",
+        "available": true
+      }
+    ]
+  }
+}
+
+<> 2025-11-07T171909.201.json
+
+###
+
+GET http://localhost:8082/api/restaurants
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2025-11-07T171746.200.json
+
+###
+
+POST http://localhost:8082/api/restaurants
+Content-Type: application/json
+Content-Length: 962
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "restaurantId": 5,
+  "name": "Amici's Italian Kitchen",
+  "cuisineType": "Italian",
+  "imageUrl": "/images/amici-italian.svg",
+  "rating": 4.5,
+  "deliveryTime": "30-40 min",
+  "menu": {
+    "menuId": 1,
+    "items": [
+      {
+        "menuItemId": 1,
+        "name": "Margherita Pizza",
+        "description": "Classic tomato, mozzarella, basil",
+        "price": 12.5,
+        "imageUrl": "/images/menu/margherita-pizza.svg",
+        "available": true
+      },
+      {
+        "menuItemId": 2,
+        "name": "Spaghetti Carbonara",
+        "description": "Pasta with egg, cheese, and pancetta",
+        "price": 15.0,
+        "imageUrl": "/images/menu/spaghetti-carbonara.svg",
+        "available": true
+      },
+      {
+        "menuItemId": 3,
+        "name": "Lasagna",
+        "description": "Layers of pasta, meat sauce, and cheese",
+        "price": 14.0,
+        "imageUrl": "/images/menu/lasagna.svg",
+        "available": true
+      }
+    ]
+  }
+}
+
+<> 2025-11-07T171730.201.json
+
+###
+
+GET http://localhost:8082/api/restaurants
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2025-11-07T171512.200.json
+
+###
+
+GET http://localhost:8082/api/restaurants
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2025-11-07T171117.200.json
+
+###
+
+GET http://localhost:8082/api/restaurants
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2025-11-07T171043.200.json
+
+###
+
+GET http://localhost:8082/restaurants
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2025-11-07T171028.404.json
+
+###
+
+GET http://localhost:8082/restaurants
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2025-11-07T170702.404.json
+
+###
+
+GET http://localhost:8082/restaurants
+User-Agent: IntelliJ HTTP Client/IntelliJ IDEA 2025.2.1
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2025-11-07T170640.404.json
+
+###
+
 POST http://localhost:8082/restaurants/13ef46b8-b31f-493b-b39a-e12566d4b75d/menu/items
 Content-Type: application/json
 Content-Length: 119
