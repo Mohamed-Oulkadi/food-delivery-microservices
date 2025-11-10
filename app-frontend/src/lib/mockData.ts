@@ -144,3 +144,36 @@ export const mockMenuItems: MenuItem[] = [
 ];
 
 export const mockUsers: UserDto[] = [];
+
+export const mockOrders: Order[] = [
+  {
+    id: '1',
+    customerId: '1',
+    restaurantId: '1',
+    items: [
+      { menuItem: mockMenuItems[0], quantity: 1 },
+      { menuItem: mockMenuItems[1], quantity: 1 },
+    ],
+    totalAmount: 27.98,
+    status: 'DELIVERED',
+    date: '2023-10-26T10:00:00Z',
+  },
+  {
+    id: '2',
+    customerId: '2',
+    restaurantId: '2',
+    items: [{ menuItem: mockMenuItems[4], quantity: 2 }],
+    totalAmount: 31.98,
+    status: 'PENDING',
+    date: '2023-10-26T11:30:00Z',
+  },
+  {
+    id: '3',
+    customerId: '3',
+    restaurantId: '3',
+    items: [{ menuItem: mockMenuItems[8], quantity: 1 }],
+    totalAmount: 8.99,
+    status: 'IN_TRANSIT',
+    date: '2023-10-26T12:15:00Z',
+  },
+];

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './contexts/AppContext';
 import { Header } from './components/Header';
 import { CartSheet } from './components/CartSheet';
@@ -11,83 +12,57 @@ import { AdminPage } from './pages/AdminPage';
 import { DriverDashboard } from './pages/DriverDashboard';
 import { Toaster } from './components/ui/sonner';
 
-type Route = {
-  page: 'home' | 'login' | 'register' | 'restaurant' | 'my-orders' | 'admin' | 'driver-dashboard';
-  restaurantId?: string;
-};
-
 const AppContent = () => {
-  const [route, setRoute] = useState<Route>({ page: 'home' });
   const [isCartOpen, setIsCartOpen] = useState(false);
   const { user } = useApp();
-
-  useEffect(() => {
-    // Redirect logic based on user role
-    if (!user && route.page !== 'login' && route.page !== 'register') {
-      setRoute({ page: 'login' });
-    } else if (user) {
-      // Redirect to appropriate home page based on role
-      if (route.page === 'login' || route.page === 'register') {
-        if (user.role === 'ROLE_ADMIN') {
-          setRoute({ page: 'admin' });
-        } else if (user.role === 'ROLE_DRIVER') {
-          setRoute({ page: 'driver-dashboard' });
-        } else {
-          setRoute({ page: 'home' });
-        }
-      }
-
-      // Prevent unauthorized access
-      if (route.page === 'admin' && user.role !== 'ROLE_ADMIN') {
-        setRoute({ page: 'home' });
-      }
-      if (route.page === 'driver-dashboard' && user.role !== 'ROLE_DRIVER') {
-        setRoute({ page: 'home' });
-      }
-    }
-  }, [user, route]);
-
-  const handleNavigate = (page: string, restaurantId?: string) => {
-    setRoute({ page: page as Route['page'], restaurantId });
-  };
+  const location = useLocation();
 
   const handleOpenCart = () => {
     setIsCartOpen(true);
   };
 
   const renderPage = () => {
-    switch (route.page) {
-      case 'login':
-        return <LoginPage onNavigate={handleNavigate} />;
-      case 'register':
-        return <RegisterPage onNavigate={handleNavigate} />;
-      case 'home':
-        if (user?.role === 'ROLE_ADMIN') {
-          return <AdminPage />;
-        } else if (user?.role === 'ROLE_DRIVER') {
-          return <DriverDashboard />;
-        }
-        return <CustomerHome onNavigate={handleNavigate} />;
-      case 'restaurant':
-        return route.restaurantId ? (
-          <RestaurantMenu restaurantId={route.restaurantId} onNavigate={handleNavigate} />
-        ) : (
-          <CustomerHome onNavigate={handleNavigate} />
-        );
-      case 'my-orders':
-        return <MyOrders />;
-      case 'admin':
-        return <AdminPage />;
-      case 'driver-dashboard':
-        return <DriverDashboard />;
-      default:
-        return <CustomerHome onNavigate={handleNavigate} />;
+    if (!user) {
+      return (
+        <Routes>
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      );
     }
+
+    if (user.role === 'ROLE_ADMIN') {
+      return (
+        <Routes>
+          <Route path="/admin/*" element={<AdminPage />} />
+          <Route path="*" element={<Navigate to="/admin/dashboard" />} />
+        </Routes>
+      );
+    }
+
+    if (user.role === 'ROLE_DRIVER') {
+      return (
+        <Routes>
+          <Route path="/driver" element={<DriverDashboard />} />
+          <Route path="*" element={<Navigate to="/driver" />} />
+        </Routes>
+      );
+    }
+
+    return (
+      <Routes>
+        <Route path="/" element={<CustomerHome />} />
+        <Route path="/restaurant/:restaurantId" element={<RestaurantMenu />} />
+        <Route path="/my-orders" element={<MyOrders />} />
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    );
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header onNavigate={handleNavigate} onOpenCart={handleOpenCart} currentPage={route.page} />
+      <Header onOpenCart={handleOpenCart} currentPage={location.pathname} />
       {renderPage()}
       {user?.role === 'ROLE_CUSTOMER' && (
         <CartSheet open={isCartOpen} onOpenChange={setIsCartOpen} />

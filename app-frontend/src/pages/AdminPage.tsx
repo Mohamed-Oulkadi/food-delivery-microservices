@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { 
   Plus, 
   Pencil, 
@@ -8,7 +9,8 @@ import {
   Store, 
   Bike,
   Menu,
-  X
+  X,
+  ShoppingCart
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
@@ -30,7 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from '../components/ui/table';
-import { Restaurant, MenuItem, UserDto } from '../lib/mockData';
+import { Restaurant, MenuItem, UserDto, Order } from '../lib/mockData';
 import { 
   getRestaurants, 
   getMenuItems, 
@@ -38,20 +40,20 @@ import {
   uploadMenuItemImage, 
   getUsers, 
   updateUser, 
-  deleteUser 
+  deleteUser,
+  getOrders
 } from '../services/api';
 import { toast } from 'sonner';
 
-type ViewType = 'dashboard' | 'clients' | 'restaurants' | 'livreurs';
-
 export const AdminPage: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
   
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [users, setUsers] = useState<UserDto[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
 
   const [isRestaurantDialogOpen, setIsRestaurantDialogOpen] = useState(false);
   const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
@@ -115,6 +117,19 @@ export const AdminPage: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    const fetchOrders = async () => {
+      try {
+        const response = await getOrders();
+        setOrders(response.data);
+      } catch (error) {
+        console.error('Failed to fetch orders', error);
+        toast.error('Failed to load orders');
+      }
+    };
+    fetchOrders();
+  }, []);
+
+  useEffect(() => {
     const fetchMenuItems = async () => {
       if (selectedRestaurantId) {
         try {
@@ -133,6 +148,11 @@ export const AdminPage: React.FC = () => {
   const clients = users.filter(u => u.role === 'ROLE_CLIENT' || u.role === 'ROLE_USER');
   const livreurs = users.filter(u => u.role === 'ROLE_LIVREUR' || u.role === 'ROLE_DELIVERY');
   const admins = users.filter(u => u.role === 'ROLE_ADMIN');
+  const orderStatusCounts = orders.reduce((acc, order) => {
+    acc[order.status] = (acc[order.status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
 
   const handleAddRestaurant = () => {
     setEditingRestaurant(null);
@@ -325,148 +345,102 @@ export const AdminPage: React.FC = () => {
 
   // Sidebar navigation items
   const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'clients', label: 'Clients', icon: Users },
-    { id: 'restaurants', label: 'Restaurants', icon: Store },
-    { id: 'livreurs', label: 'Livreurs', icon: Bike },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, to: '/admin/dashboard' },
+    { id: 'clients', label: 'Clients', icon: Users, to: '/admin/clients' },
+    { id: 'restaurants', label: 'Restaurants', icon: Store, to: '/admin/restaurants' },
+    { id: 'livreurs', label: 'Livreurs', icon: Bike, to: '/admin/livreurs' },
   ];
-
-  // Statistics Cards Component
-  const StatisticsCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {/* Total Clients Card */}
-      <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Clients</p>
-              <h3 className="text-3xl font-bold text-gray-900">{clients.length}</h3>
-              <p className="text-xs text-gray-500 mt-1">Active users on platform</p>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-              <Users className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Total Restaurants Card */}
-      <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-green-500">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Restaurants</p>
-              <h3 className="text-3xl font-bold text-gray-900">{restaurants.length}</h3>
-              <p className="text-xs text-gray-500 mt-1">Partner restaurants</p>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-              <Store className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Total Livreurs Card */}
-      <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Livreurs</p>
-              <h3 className="text-3xl font-bold text-gray-900">{livreurs.length}</h3>
-              <p className="text-xs text-gray-500 mt-1">Delivery personnel available</p>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center">
-              <Bike className="h-6 w-6 text-orange-600" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Total Users Card */}
-      <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-purple-500">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Users</p>
-              <h3 className="text-3xl font-bold text-gray-900">{users.length}</h3>
-              <p className="text-xs text-gray-500 mt-1">All registered users</p>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
-              <Users className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
 
   // Dashboard View
   const DashboardView = () => (
     <div>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">Dashboard Overview</h2>
-        <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your platform.</p>
+      <div className="mb-8 p-6 bg-gradient-to-r from-green-50 to-cyan-50 rounded-lg">
+        <h2 className="text-3xl font-bold text-slate-900">Dashboard Overview</h2>
+        <p className="text-slate-600 mt-1">Welcome back! Here's what's happening with your platform.</p>
       </div>
       
-      <StatisticsCards />
+      <div className="flex flex-row flex-nowrap gap-4 mb-8 overflow-x-auto">
+        <Card className="bg-blue-50 text-blue-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Clients</CardTitle>
+            <Users className="h-4 w-4 text-blue-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{clients.length}</div>
+            <p className="text-xs text-blue-700">Active users on platform</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-green-50 text-green-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Restaurants</CardTitle>
+            <Store className="h-4 w-4 text-green-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{restaurants.length}</div>
+            <p className="text-xs text-green-700">Partner restaurants</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-orange-50 text-orange-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Livreurs</CardTitle>
+            <Bike className="h-4 w-4 text-orange-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{livreurs.length}</div>
+            <p className="text-xs text-orange-700">Delivery personnel available</p>
+          </CardContent>
+        </Card>
+        <Card className="bg-purple-50 text-purple-800">
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+            <ShoppingCart className="h-4 w-4 text-purple-600" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{orders.length}</div>
+            <p className="text-xs text-purple-700">Total orders placed</p>
+          </CardContent>
+        </Card>
+      </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="border-b">
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle>Order Status</CardTitle>
           </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
-                <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">
-                    {restaurants.length} Restaurants Registered
-                  </p>
-                  <p className="text-xs text-gray-500">Active partner restaurants</p>
-                </div>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center p-3 bg-orange-50 rounded-lg">
+                <span className="text-sm font-medium text-orange-600">Pending</span>
+                <span className="text-lg font-bold text-orange-900">{orderStatusCounts['PENDING'] || 0}</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">
-                    {clients.length} Active Clients
-                  </p>
-                  <p className="text-xs text-gray-500">Platform users</p>
-                </div>
+              <div className="flex justify-between items-center p-3 bg-blue-50 rounded-lg">
+                <span className="text-sm font-medium text-blue-600">In Transit</span>
+                <span className="text-lg font-bold text-blue-900">{orderStatusCounts['IN_TRANSIT'] || 0}</span>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
-                <div className="h-3 w-3 rounded-full bg-orange-500"></div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">
-                    {livreurs.length} Delivery Personnel
-                  </p>
-                  <p className="text-xs text-gray-500">Available livreurs</p>
-                </div>
+              <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
+                <span className="text-sm font-medium text-green-600">Delivered</span>
+                <span className="text-lg font-bold text-green-900">{orderStatusCounts['DELIVERED'] || 0}</span>
               </div>
             </div>
           </CardContent>
         </Card>
-
-        {/* Quick Stats Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="border-b">
-            <CardTitle className="text-lg">Quick Stats</CardTitle>
+        <Card>
+          <CardHeader>
+            <CardTitle>Quick Stats</CardTitle>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent>
             <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700 font-medium">Total Menu Items</span>
-                <span className="text-2xl font-bold text-gray-900">{menuItems.length}</span>
+              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                <span className="text-sm font-medium text-slate-600">Total Menu Items</span>
+                <span className="text-lg font-bold text-slate-900">{menuItems.length}</span>
               </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700 font-medium">System Admins</span>
-                <span className="text-2xl font-bold text-gray-900">{admins.length}</span>
+              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                <span className="text-sm font-medium text-slate-600">System Admins</span>
+                <span className="text-lg font-bold text-slate-900">{admins.length}</span>
               </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700 font-medium">Avg. Items/Restaurant</span>
-                <span className="text-2xl font-bold text-gray-900">
+              <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                <span className="text-sm font-medium text-slate-600">Avg. Items/Restaurant</span>
+                <span className="text-lg font-bold text-slate-900">
                   {restaurants.length > 0 ? (menuItems.length / restaurants.length).toFixed(1) : '0.0'}
                 </span>
               </div>
@@ -482,10 +456,10 @@ export const AdminPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Client Management</h2>
-          <p className="text-sm text-gray-600 mt-1">Manage all client accounts</p>
+          <h2 className="text-2xl font-bold text-slate-900">Client Management</h2>
+          <p className="text-sm text-slate-600 mt-1">Manage all client accounts</p>
         </div>
-        <div className="text-sm text-gray-600 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
+        <div className="text-sm text-slate-600 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
           <span className="font-semibold text-blue-700">{clients.length}</span> total clients
         </div>
       </div>
@@ -499,7 +473,7 @@ export const AdminPage: React.FC = () => {
           <CardContent className="pt-6">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-slate-100">
                   <TableHead>ID</TableHead>
                   <TableHead>Username</TableHead>
                   <TableHead>Email</TableHead>
@@ -510,18 +484,18 @@ export const AdminPage: React.FC = () => {
               <TableBody>
                 {clients.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={5} className="text-center py-8 text-slate-500">
                       No clients found
                     </TableCell>
                   </TableRow>
                 ) : (
                   clients.map(user => (
-                    <TableRow key={user.userId} className="hover:bg-gray-50 transition-colors">
+                    <TableRow key={user.userId} className="hover:bg-slate-50 transition-colors">
                       <TableCell className="font-medium">{user.userId}</TableCell>
                       <TableCell>{user.username}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                        <span className="px-2 py-1 bg-sky-100 text-sky-700 text-xs rounded-full font-medium">
                           {user.role.replace('ROLE_', '')}
                         </span>
                       </TableCell>
@@ -561,8 +535,8 @@ export const AdminPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Restaurant Management</h2>
-          <p className="text-sm text-gray-600 mt-1">Manage partner restaurants and menus</p>
+          <h2 className="text-2xl font-bold text-slate-900">Restaurant Management</h2>
+          <p className="text-sm text-slate-600 mt-1">Manage partner restaurants and menus</p>
         </div>
         <Button onClick={handleAddRestaurant} className="bg-green-600 hover:bg-green-700">
           <Plus className="h-4 w-4 mr-2" />
@@ -579,7 +553,7 @@ export const AdminPage: React.FC = () => {
           <CardContent className="pt-6">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-slate-100">
                   <TableHead>ID</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Cuisine Type</TableHead>
@@ -590,13 +564,13 @@ export const AdminPage: React.FC = () => {
               <TableBody>
                 {restaurants.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={5} className="text-center py-8 text-slate-500">
                       No restaurants found. Click "Add Restaurant" to create one.
                     </TableCell>
                   </TableRow>
                 ) : (
                   restaurants.map(restaurant => (
-                    <TableRow key={restaurant.restaurantId} className="hover:bg-gray-50 transition-colors">
+                    <TableRow key={restaurant.restaurantId} className="hover:bg-slate-50 transition-colors">
                       <TableCell className="font-medium">{restaurant.restaurantId}</TableCell>
                       <TableCell className="font-semibold">{restaurant.name}</TableCell>
                       <TableCell>
@@ -651,10 +625,10 @@ export const AdminPage: React.FC = () => {
     <div>
       <div className="flex justify-between items-center mb-6">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">Livreur Management</h2>
-          <p className="text-sm text-gray-600 mt-1">Manage delivery personnel</p>
+          <h2 className="text-2xl font-bold text-slate-900">Livreur Management</h2>
+          <p className="text-sm text-slate-600 mt-1">Manage delivery personnel</p>
         </div>
-        <div className="text-sm text-gray-600 bg-orange-50 px-4 py-2 rounded-lg border border-orange-200">
+        <div className="text-sm text-slate-600 bg-orange-50 px-4 py-2 rounded-lg border border-orange-200">
           <span className="font-semibold text-orange-700">{livreurs.length}</span> total livreurs
         </div>
       </div>
@@ -668,7 +642,7 @@ export const AdminPage: React.FC = () => {
           <CardContent className="pt-6">
             <Table>
               <TableHeader>
-                <TableRow>
+                <TableRow className="bg-slate-100">
                   <TableHead>ID</TableHead>
                   <TableHead>Username</TableHead>
                   <TableHead>Email</TableHead>
@@ -679,18 +653,18 @@ export const AdminPage: React.FC = () => {
               <TableBody>
                 {livreurs.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                    <TableCell colSpan={5} className="text-center py-8 text-slate-500">
                       No delivery personnel found
                     </TableCell>
                   </TableRow>
                 ) : (
                   livreurs.map(user => (
-                    <TableRow key={user.userId} className="hover:bg-gray-50 transition-colors">
+                    <TableRow key={user.userId} className="hover:bg-slate-50 transition-colors">
                       <TableCell className="font-medium">{user.userId}</TableCell>
                       <TableCell>{user.username}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell>
-                        <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full font-medium">
+                        <span className="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-full font-medium">
                           {user.role.replace('ROLE_', '')}
                         </span>
                       </TableCell>
@@ -758,18 +732,18 @@ export const AdminPage: React.FC = () => {
           {navigationItems.map(item => {
             const Icon = item.icon;
             return (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => setCurrentView(item.id as ViewType)}
+                to={item.to}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  currentView === item.id
+                  location.pathname === item.to
                     ? 'bg-green-50 text-green-700 font-semibold shadow-sm'
                     : 'text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
                 {isSidebarOpen && <span>{item.label}</span>}
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -791,10 +765,13 @@ export const AdminPage: React.FC = () => {
         <main className="flex-1 overflow-y-auto">
           <div className="p-8">
             <div className="max-w-7xl mx-auto">
-              {currentView === 'dashboard' && <DashboardView />}
-              {currentView === 'clients' && <ClientsView />}
-              {currentView === 'restaurants' && <RestaurantsView />}
-              {currentView === 'livreurs' && <LivreursView />}
+              <Routes>
+                <Route path="dashboard" element={<DashboardView />} />
+                <Route path="clients" element={<ClientsView />} />
+                <Route path="restaurants" element={<RestaurantsView />} />
+                <Route path="livreurs" element={<LivreursView />} />
+                <Route path="*" element={<Navigate to="dashboard" replace />} />
+              </Routes>
             </div>
           </div>
         </main>

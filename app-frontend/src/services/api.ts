@@ -54,6 +54,7 @@ export const uploadMenuItemImage = (menuItemId: string, file: File) => {
 export const createOrder = (order: Omit<Order, 'id' | 'status' | 'date'>) => orderService.post<Order>('', order);
 export const getOrderById = (id: string) => orderService.get<Order>(`/${id}`);
 export const getMyOrders = (customerId: string) => orderService.get<Order[]>(`/customer/${customerId}`);
+export const getOrders = () => orderService.get<Order[]>('');
 
 // Delivery Service
 export const getDeliveryStatus = (orderId: string) => deliveryService.get<Delivery>(`/order/${orderId}`);
