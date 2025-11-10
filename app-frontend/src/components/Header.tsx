@@ -74,12 +74,7 @@ export const Header: React.FC<HeaderProps> = ({ onNavigate, onOpenCart, currentP
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-48">
                     
-                    {user.role === 'ROLE_ADMIN' && (
-                      <DropdownMenuItem onClick={() => onNavigate('admin')}>
-                        <LayoutDashboard className="mr-2 h-4 w-4" />
-                        Admin Panel
-                      </DropdownMenuItem>
-                    )}
+                    
                     {user.role === 'ROLE_DRIVER' && (
                       <DropdownMenuItem onClick={() => onNavigate('driver-dashboard')}>
                         <LayoutDashboard className="mr-2 h-4 w-4" />
