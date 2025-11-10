@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Search, Star, Clock } from 'lucide-react';
 import { Card, CardContent } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -15,11 +16,7 @@ import { toast } from 'sonner';
 
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
-interface CustomerHomeProps {
-  onNavigate: (page: string, restaurantId?: string) => void;
-}
-
-export const CustomerHome: React.FC<CustomerHomeProps> = ({ onNavigate }) => {
+export const CustomerHome: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [cuisineFilter, setCuisineFilter] = useState('all');
@@ -88,30 +85,30 @@ export const CustomerHome: React.FC<CustomerHomeProps> = ({ onNavigate }) => {
         {/* Restaurant Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {filteredRestaurants.map(restaurant => (
-            <Card
-              key={restaurant.restaurantId}
-              className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-              onClick={() => onNavigate('restaurant', restaurant.restaurantId)}
-            >
-              <div className="aspect-[16/9] overflow-hidden bg-gray-200">
-                <ImageWithFallback
-                  src={restaurant.imageUrl}
-                  alt={restaurant.name}
-                  className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-                />
-              </div>
-              <CardContent className="p-4">
-                <h3 className="text-gray-900 mb-1">{restaurant.name}</h3>
-                <p className="text-gray-600 text-sm mb-3">{restaurant.cuisineType}</p>
-                <div className="flex items-center text-sm text-gray-600">
-                  <Star className="h-4 w-4 mr-1 text-yellow-500" />
-                  <span>{typeof restaurant.rating === 'number' ? restaurant.rating.toFixed(1) : '—'}</span>
-                  <span className="mx-2">•</span>
-                  <Clock className="h-4 w-4 mr-1" />
-                  <span>{restaurant.deliveryTime ?? 'N/A'}</span>
+            <Link to={`/restaurant/${restaurant.restaurantId}`} key={restaurant.restaurantId}>
+              <Card
+                className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
+              >
+                <div className="aspect-[16/9] overflow-hidden bg-gray-200">
+                  <ImageWithFallback
+                    src={restaurant.imageUrl}
+                    alt={restaurant.name}
+                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
-              </CardContent>
-            </Card>
+                <CardContent className="p-4">
+                  <h3 className="text-gray-900 mb-1">{restaurant.name}</h3>
+                  <p className="text-gray-600 text-sm mb-3">{restaurant.cuisineType}</p>
+                  <div className="flex items-center text-sm text-gray-600">
+                    <Star className="h-4 w-4 mr-1 text-yellow-500" />
+                    <span>{typeof restaurant.rating === 'number' ? restaurant.rating.toFixed(1) : '—'}</span>
+                    <span className="mx-2">•</span>
+                    <Clock className="h-4 w-4 mr-1" />
+                    <span>{restaurant.deliveryTime ?? 'N/A'}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
           ))}
         </div>
 

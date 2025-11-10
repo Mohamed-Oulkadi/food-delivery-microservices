@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, ShoppingCart, Star, MapPin } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { Card, CardContent } from '../components/ui/card';
@@ -8,12 +9,8 @@ import { useApp } from '../contexts/AppContext';
 import { toast } from 'sonner';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
 
-interface RestaurantMenuProps {
-  restaurantId: string;
-  onNavigate: (page: string) => void;
-}
-
-export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({ restaurantId, onNavigate }) => {
+export const RestaurantMenu: React.FC = () => {
+  const { restaurantId } = useParams<{ restaurantId: string }>();
   const { addToCart } = useApp();
   // We'll treat backend responses as `any` and map to the frontend MenuItem type
   const [restaurant, setRestaurant] = useState<any | null>(null);
@@ -21,6 +18,7 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({ restaurantId, on
 
   useEffect(() => {
     const fetchRestaurantDetails = async () => {
+      if (!restaurantId) return;
       try {
         const [restaurantResponse, menuResponse] = await Promise.all([
           getRestaurantById(restaurantId),
@@ -50,7 +48,9 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({ restaurantId, on
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
         <div className="text-center">
           <p className="text-gray-600 mb-4">Restaurant not found</p>
-          <Button onClick={() => onNavigate('home')}>Back to Home</Button>
+          <Button asChild>
+            <Link to="/">Back to Home</Link>
+          </Button>
         </div>
       </div>
     );
@@ -68,10 +68,12 @@ export const RestaurantMenu: React.FC<RestaurantMenuProps> = ({ restaurantId, on
         <Button
           variant="ghost"
           className="mb-6"
-          onClick={() => onNavigate('home')}
+          asChild
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Restaurants
+          <Link to="/">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Restaurants
+          </Link>
         </Button>
 
         {/* Restaurant Header */}

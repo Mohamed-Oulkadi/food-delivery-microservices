@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AppProvider, useApp } from './contexts/AppContext';
 import { Header } from './components/Header';
@@ -11,6 +11,7 @@ import { MyOrders } from './pages/MyOrders';
 import { AdminPage } from './pages/AdminPage';
 import { DriverDashboard } from './pages/DriverDashboard';
 import { Toaster } from './components/ui/sonner';
+import { ProtectedRoute } from './components/ProtectedRoute';
 
 const AppContent = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -21,49 +22,29 @@ const AppContent = () => {
     setIsCartOpen(true);
   };
 
-  const renderPage = () => {
-    if (!user) {
-      return (
-        <Routes>
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route path="*" element={<Navigate to="/login" />} />
-        </Routes>
-      );
-    }
-
-    if (user.role === 'ROLE_ADMIN') {
-      return (
-        <Routes>
-          <Route path="/admin/*" element={<AdminPage />} />
-          <Route path="*" element={<Navigate to="/admin/dashboard" />} />
-        </Routes>
-      );
-    }
-
-    if (user.role === 'ROLE_DRIVER') {
-      return (
-        <Routes>
-          <Route path="/driver" element={<DriverDashboard />} />
-          <Route path="*" element={<Navigate to="/driver" />} />
-        </Routes>
-      );
-    }
-
-    return (
-      <Routes>
-        <Route path="/" element={<CustomerHome />} />
-        <Route path="/restaurant/:restaurantId" element={<RestaurantMenu />} />
-        <Route path="/my-orders" element={<MyOrders />} />
-        <Route path="*" element={<Navigate to="/" />} />
-      </Routes>
-    );
-  };
-
   return (
     <div className="min-h-screen bg-gray-50">
       <Header onOpenCart={handleOpenCart} currentPage={location.pathname} />
-      {renderPage()}
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
+        <Route element={<ProtectedRoute allowedRoles={['ROLE_CUSTOMER']} />}>
+          <Route path="/" element={<CustomerHome />} />
+          <Route path="/restaurant/:restaurantId" element={<RestaurantMenu />} />
+          <Route path="/my-orders" element={<MyOrders />} />
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
+          <Route path="/admin/*" element={<AdminPage />} />
+        </Route>
+
+        <Route element={<ProtectedRoute allowedRoles={['ROLE_DRIVER']} />}>
+          <Route path="/driver" element={<DriverDashboard />} />
+        </Route>
+
+        <Route path="*" element={<Navigate to={user ? (user.role === 'ROLE_ADMIN' ? '/admin/dashboard' : (user.role === 'ROLE_DRIVER' ? '/driver' : '/')) : '/login'} />} />
+      </Routes>
       {user?.role === 'ROLE_CUSTOMER' && (
         <CartSheet open={isCartOpen} onOpenChange={setIsCartOpen} />
       )}

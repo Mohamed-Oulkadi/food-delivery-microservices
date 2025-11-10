@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
@@ -11,19 +12,16 @@ import {
   SelectValue,
 } from '../components/ui/select';
 import { useApp } from '../contexts/AppContext';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
-interface RegisterPageProps {
-  onNavigate: (page: string) => void;
-}
-
-export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
+export const RegisterPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [role, setRole] = useState('ROLE_CUSTOMER');
   const { register } = useApp();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +39,7 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
     const success = await register(username, email, password, role);
     if (success) {
       toast.success('Registration successful!');
-      onNavigate('login');
+      navigate('/login');
     } else {
       toast.error('Registration failed. Please try again.');
     }
@@ -119,13 +117,9 @@ export const RegisterPage: React.FC<RegisterPageProps> = ({ onNavigate }) => {
 
             <p className="text-center text-sm text-gray-600">
               Already have an account?{' '}
-              <button
-                type="button"
-                onClick={() => onNavigate('login')}
-                className="text-green-600 hover:underline"
-              >
+              <Link to="/login" className="text-green-600 hover:underline">
                 Login
-              </button>
+              </Link>
             </p>
           </form>
         </CardContent>

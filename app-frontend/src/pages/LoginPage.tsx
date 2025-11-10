@@ -1,19 +1,17 @@
 import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Button } from '../components/ui/button';
 import { useApp } from '../contexts/AppContext';
-import { toast } from 'sonner@2.0.3';
+import { toast } from 'sonner';
 
-interface LoginPageProps {
-  onNavigate: (page: string) => void;
-}
-
-export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
+export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const { login } = useApp();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,10 +21,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
       return;
     }
 
-    const success = await login(username, password);
-    if (success) {
+    const user = await login(username, password);
+    if (user) {
       toast.success('Login successful!');
-      onNavigate('home');
+      if (user.role === 'ROLE_ADMIN') {
+        navigate('/admin/dashboard');
+      } else if (user.role === 'ROLE_DRIVER') {
+        navigate('/driver');
+      } else {
+        navigate('/');
+      }
     } else {
       toast.error('Invalid credentials. Try: customer/customer123, admin/admin123, or driver/driver123');
     }
@@ -69,13 +73,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onNavigate }) => {
 
             <p className="text-center text-sm text-gray-600">
               Don't have an account?{' '}
-              <button
-                type="button"
-                onClick={() => onNavigate('register')}
-                className="text-green-600 hover:underline"
-              >
+              <Link to="/register" className="text-green-600 hover:underline">
                 Register
-              </button>
+              </Link>
             </p>
 
             <div className="mt-4 p-4 bg-gray-100 rounded-lg text-sm">
