@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react';
 import { CartItem, MenuItem, User } from '../lib/mockData';
 import * as api from '../services/api';
 
 interface AppContextType {
   user: User | null;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (username: string, password:string) => Promise<boolean>;
   logout: () => void;
   register: (username: string, email: string, password: string, role: string) => Promise<boolean>;
   cart: CartItem[];
@@ -27,8 +27,28 @@ export const useApp = () => {
 };
 
 export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    try {
+      const storedUser = localStorage.getItem('user');
+      return storedUser ? JSON.parse(storedUser) : null;
+    } catch (error) {
+      console.error('Failed to parse user from localStorage', error);
+      return null;
+    }
+  });
   const [cart, setCart] = useState<CartItem[]>([]);
+
+  useEffect(() => {
+    try {
+      if (user) {
+        localStorage.setItem('user', JSON.stringify(user));
+      } else {
+        localStorage.removeItem('user');
+      }
+    } catch (error) {
+      console.error('Failed to update user in localStorage', error);
+    }
+  }, [user]);
 
   const login = async (username: string, password: string): Promise<boolean> => {
     try {
@@ -41,6 +61,7 @@ export const AppProvider: React.FC<{ children: ReactNode }> = ({ children }) => 
         email: dto.email,
         role: dto.role || 'ROLE_CUSTOMER'
       };
+      console.log('Logged in user role:', mappedUser.role);
       setUser(mappedUser);
       return true;
     } catch (error) {

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
@@ -10,8 +10,36 @@ import { toast } from 'sonner';
 export const LoginPage: React.FC = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { login } = useApp();
+  const { login, user } = useApp();
   const navigate = useNavigate();
+  const loginAttempted = useRef(false);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (user && !loginAttempted.current) {
+      if (user.role === 'ROLE_ADMIN') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (user.role === 'ROLE_DRIVER') {
+        navigate('/driver', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [user, navigate]);
+
+  // Navigate based on user role after successful login
+  useEffect(() => {
+    if (user && loginAttempted.current) {
+      loginAttempted.current = false;
+      if (user.role === 'ROLE_ADMIN') {
+        navigate('/admin/dashboard', { replace: true });
+      } else if (user.role === 'ROLE_DRIVER') {
+        navigate('/driver', { replace: true });
+      } else {
+        navigate('/', { replace: true });
+      }
+    }
+  }, [user, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,17 +49,13 @@ export const LoginPage: React.FC = () => {
       return;
     }
 
-    const user = await login(username, password);
-    if (user) {
+    loginAttempted.current = true;
+    const success = await login(username, password);
+    if (success) {
       toast.success('Login successful!');
-      if (user.role === 'ROLE_ADMIN') {
-        navigate('/admin/dashboard');
-      } else if (user.role === 'ROLE_DRIVER') {
-        navigate('/driver');
-      } else {
-        navigate('/');
-      }
+      // Navigation will happen in useEffect when user state updates
     } else {
+      loginAttempted.current = false;
       toast.error('Invalid credentials. Try: customer/customer123, admin/admin123, or driver/driver123');
     }
   };

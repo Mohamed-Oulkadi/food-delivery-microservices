@@ -36,7 +36,13 @@ const AppContent = () => {
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
-          <Route path="/admin/*" element={<AdminPage />} />
+          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
+          <Route
+            path="/admin/*"
+            element={
+              <AdminPage />
+            }
+          />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['ROLE_DRIVER']} />}>
