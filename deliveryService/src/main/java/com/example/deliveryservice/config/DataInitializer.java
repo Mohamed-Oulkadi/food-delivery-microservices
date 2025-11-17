@@ -20,15 +20,34 @@ public class DataInitializer implements CommandLineRunner {
         if (deliveryRepository.count() == 0) {
             System.out.println("Seeding Delivery database...");
 
-            Delivery delivery = new Delivery();
-            delivery.setOrderId(1L); // Links to the seeded order from OrderService
-            delivery.setDriverId(101L); // A sample driver ID
-            delivery.setStatus(DeliveryStatus.DELIVERED);
-            delivery.setEstimatedDeliveryTime(LocalDateTime.now().minusMinutes(15));
-            delivery.setActualDeliveryTime(LocalDateTime.now().minusMinutes(5));
+            Delivery completed = new Delivery();
+            completed.setOrderId(1L);
+            completed.setDriverId(101L);
+            completed.setCustomerAddress("123 Oak Street, Apt 4B");
+            completed.setRestaurantName("Amici's Italian Kitchen");
+            completed.setStatus(DeliveryStatus.DELIVERED);
+            completed.setEstimatedDeliveryTime(LocalDateTime.now().minusMinutes(45));
+            completed.setActualDeliveryTime(LocalDateTime.now().minusMinutes(5));
 
-            deliveryRepository.save(delivery);
-            System.out.println("Delivery database seeded with 1 delivery.");
+            Delivery pending = new Delivery();
+            pending.setOrderId(2L);
+            pending.setCustomerAddress("456 Maple Avenue");
+            pending.setRestaurantName("Spice of India");
+            pending.setStatus(DeliveryStatus.PENDING);
+            pending.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(25));
+
+            Delivery active = new Delivery();
+            active.setOrderId(3L);
+            active.setDriverId(101L);
+            active.setCustomerAddress("789 Pine Road, Unit 12");
+            active.setRestaurantName("Sushi Paradise");
+            active.setStatus(DeliveryStatus.IN_TRANSIT);
+            active.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(10));
+
+            deliveryRepository.save(completed);
+            deliveryRepository.save(pending);
+            deliveryRepository.save(active);
+            System.out.println("Delivery database seeded with demo deliveries.");
         }
     }
 }

@@ -60,6 +60,11 @@ export const getOrderStats = () => orderService.get<{ totalOrders: number; pendi
 // Delivery Service
 export const getDeliveryStatus = (orderId: string) => deliveryService.get<Delivery>(`/order/${orderId}`);
 export const updateDeliveryStatus = (id: string, status: string) => deliveryService.put<Delivery>(`/${id}/status`, { status });
+export const getPendingDeliveries = () => deliveryService.get<Delivery[]>('/pending');
+export const getDriverActiveDeliveries = (driverId: string | number) =>
+  deliveryService.get<Delivery[]>(`/driver/${driverId}/active`);
+export const assignDelivery = (id: string | number, driverId: string | number) =>
+  deliveryService.put<Delivery>(`/${id}/assign`, { driverId });
 
 // User Service
 export const login = (credentials: {username: string, password: string}) => userService.post<UserDto>('/login', credentials);

@@ -1,5 +1,6 @@
 package com.example.orderservice.services;
 
+import com.example.orderservice.dtos.DeliveryRequestDto;
 import com.example.orderservice.dtos.OrderItemDto;
 import com.example.orderservice.dtos.OrderRequestDto;
 import com.example.orderservice.dtos.OrderStatsDto;
@@ -10,6 +11,7 @@ import com.example.orderservice.repositories.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +22,7 @@ import java.util.Objects;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final WebClient webClient;
 
     @Transactional
     public Order createOrder(OrderRequestDto orderRequest) {
@@ -67,7 +70,26 @@ public class OrderService {
         order.setItems(orderItems);
         order.setTotalAmount(totalAmount);
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+
+        // Create a delivery request
+        DeliveryRequestDto deliveryRequestDto = new DeliveryRequestDto();
+        deliveryRequestDto.setOrderId(savedOrder.getOrderId());
+        // In a real system, you would fetch customer address and restaurant name from other services
+        deliveryRequestDto.setCustomerAddress("Customer Address Placeholder");
+        deliveryRequestDto.setRestaurantName("Restaurant Name Placeholder");
+
+        webClient.post()
+                .uri("/api/deliveries")
+                .bodyValue(deliveryRequestDto)
+                .retrieve()
+                .bodyToMono(Void.class)
+                .subscribe(
+                        response -> System.out.println("Delivery request sent successfully for order: " + savedOrder.getOrderId()),
+                        error -> System.err.println("Failed to send delivery request for order: " + savedOrder.getOrderId() + " Error: " + error.getMessage())
+                );
+
+        return savedOrder;
     }
 
     public Order getOrderById(Long orderId) {

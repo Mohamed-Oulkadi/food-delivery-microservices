@@ -18,6 +18,9 @@ public class Delivery {
 
     private Long driverId; // Foreign key from a future DriverService
 
+    private String customerAddress;
+    private String restaurantName;
+
     @Enumerated(EnumType.STRING)
     private DeliveryStatus status;
 

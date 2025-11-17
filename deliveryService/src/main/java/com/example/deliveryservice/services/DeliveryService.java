@@ -22,6 +22,8 @@ public class DeliveryService {
         Delivery delivery = new Delivery();
         delivery.setOrderId(request.getOrderId());
         delivery.setDriverId(request.getDriverId()); // Can be null
+        delivery.setCustomerAddress(request.getCustomerAddress());
+        delivery.setRestaurantName(request.getRestaurantName());
         delivery.setStatus(DeliveryStatus.PENDING);
         delivery.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(30)); // Simple estimate
 
@@ -50,5 +52,37 @@ public class DeliveryService {
         }
 
         return deliveryRepository.save(delivery);
+    }
+
+    public java.util.List<Delivery> getPendingDeliveries() {
+        return deliveryRepository.findByStatus(DeliveryStatus.PENDING);
+    }
+
+    public java.util.List<Delivery> getActiveDeliveriesForDriver(Long driverId) {
+        if (driverId == null) {
+            return java.util.List.of();
+        }
+        return deliveryRepository.findByDriverIdAndStatusNot(driverId, DeliveryStatus.DELIVERED);
+    }
+
+    @Transactional
+    public Delivery assignDelivery(Long deliveryId, Long driverId) {
+        if (driverId == null) {
+            throw new IllegalArgumentException("Driver ID is required to accept a delivery");
+        }
+        Delivery delivery = getDeliveryById(deliveryId);
+        if (delivery.getDriverId() != null && !delivery.getDriverId().equals(driverId)) {
+            throw new IllegalStateException("Delivery already assigned to another driver");
+        }
+        delivery.setDriverId(driverId);
+        delivery.setStatus(DeliveryStatus.ACCEPTED);
+        if (delivery.getEstimatedDeliveryTime() == null) {
+            delivery.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(30));
+        }
+        return deliveryRepository.save(delivery);
+    }
+
+    public java.util.List<Delivery> getAllDeliveries() {
+        return deliveryRepository.findAll();
     }
 }

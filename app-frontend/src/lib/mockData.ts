@@ -32,13 +32,18 @@ export interface Order {
   date: string;
 }
 
+export type DeliveryStatus = 'PENDING' | 'ACCEPTED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
+
 export interface Delivery {
-  id: string;
-  orderId: string;
-  customerAddress: string;
-  restaurantName: string;
-  status: 'PENDING' | 'ACCEPTED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED';
-  driverId?: string;
+  deliveryId?: number;
+  id?: string;
+  orderId: string | number;
+  customerAddress?: string;
+  restaurantName?: string;
+  status: DeliveryStatus;
+  driverId?: string | number;
+  estimatedDeliveryTime?: string;
+  actualDeliveryTime?: string;
 }
 
 export interface UserDto {
