@@ -29,7 +29,7 @@ const userService = axios.create({
 // Restaurant Service
 export const getRestaurants = () => restaurantService.get<Restaurant[]>('');
 export const getRestaurantById = (id: string) => restaurantService.get<Restaurant>(`/${id}`);
-export const getMenuItems = (restaurantId: string) => restaurantService.get<MenuItem[]>(`/${restaurantId}/menu`);
+export const getMenuItems = (restaurantId: string) => restaurantService.get<Menu>(`/${restaurantId}/menu`);
 export const uploadRestaurantImage = (restaurantId: string, file: File) => {
   const formData = new FormData();
   formData.append('file', file);

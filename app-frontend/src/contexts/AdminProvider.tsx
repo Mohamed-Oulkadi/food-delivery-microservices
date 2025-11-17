@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Restaurant, MenuItem, UserDto } from '../lib/mockData';
+import { Restaurant, MenuItem, UserDto, Menu } from '../lib/mockData';
 import { 
   getRestaurants, 
   getMenuItems, 
@@ -111,7 +111,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
         for (const restaurant of restaurants) {
           try {
             const menuItemsResponse = await getMenuItems(restaurant.restaurantId);
-            allMenuItems.push(...menuItemsResponse.data);
+            const itemsWithRestaurantId = menuItemsResponse.data.items.map(item => ({
+              ...item,
+              restaurantId: restaurant.restaurantId,
+            }));
+            allMenuItems.push(...itemsWithRestaurantId);
           } catch (error) {
             console.error(`Failed to fetch menu items for restaurant ${restaurant.restaurantId}`, error);
           }
