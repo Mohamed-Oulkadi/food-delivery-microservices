@@ -2,6 +2,7 @@ package com.example.orderservice.services;
 
 import com.example.orderservice.dtos.OrderItemDto;
 import com.example.orderservice.dtos.OrderRequestDto;
+import com.example.orderservice.dtos.OrderStatsDto;
 import com.example.orderservice.entities.Order;
 import com.example.orderservice.entities.OrderItem;
 import com.example.orderservice.entities.OrderStatus;
@@ -12,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -82,5 +83,23 @@ public class OrderService {
     public List<Order> getOrdersByCustomer(Long customerId) {
         if (customerId == null) return List.of();
         return orderRepository.findByUserId(customerId);
+    }
+
+    public OrderStatsDto getOrderStats() {
+        List<Order> allOrders = orderRepository.findAll();
+        long totalOrders = allOrders.size();
+        long deliveredOrders = allOrders.stream()
+                .filter(order -> OrderStatus.DELIVERED.equals(order.getStatus()))
+                .count();
+        long pendingOrders = allOrders.stream()
+                .filter(order -> {
+                    OrderStatus status = order.getStatus();
+                    return status != null
+                            && status != OrderStatus.DELIVERED
+                            && status != OrderStatus.CANCELLED;
+                })
+                .count();
+
+        return new OrderStatsDto(totalOrders, pendingOrders, deliveredOrders);
     }
 }

@@ -3,6 +3,7 @@ package com.example.orderservice.web;
 import com.example.orderservice.dtos.OrderDto;
 import com.example.orderservice.dtos.OrderItemDto;
 import com.example.orderservice.dtos.OrderRequestDto;
+import com.example.orderservice.dtos.OrderStatsDto;
 import com.example.orderservice.entities.Order;
 import com.example.orderservice.services.OrderService;
 import lombok.RequiredArgsConstructor;
@@ -48,6 +49,11 @@ public class OrderController {
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long orderId) {
         return ResponseEntity.ok(toDto(orderService.getOrderById(orderId)));
+    }
+
+    @GetMapping("/stats")
+    public ResponseEntity<OrderStatsDto> getOrderStats() {
+        return ResponseEntity.ok(orderService.getOrderStats());
     }
 
     private OrderDto toDto(Order order) {

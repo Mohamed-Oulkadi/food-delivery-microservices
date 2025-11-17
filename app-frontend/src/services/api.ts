@@ -55,6 +55,7 @@ export const createOrder = (order: Omit<Order, 'id' | 'status' | 'date'>) => ord
 export const getOrderById = (id: string) => orderService.get<Order>(`/${id}`);
 export const getMyOrders = (customerId: string) => orderService.get<Order[]>(`/customer/${customerId}`);
 export const getOrders = () => orderService.get<Order[]>('');
+export const getOrderStats = () => orderService.get<{ totalOrders: number; pendingOrders: number; deliveredOrders: number }>('/stats');
 
 // Delivery Service
 export const getDeliveryStatus = (orderId: string) => deliveryService.get<Delivery>(`/order/${orderId}`);

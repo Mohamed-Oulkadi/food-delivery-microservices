@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { Restaurant, MenuItem, UserDto, Menu } from '../lib/mockData';
+import { Restaurant, MenuItem, UserDto, Menu, Order } from '../lib/mockData';
 import { 
   getRestaurants, 
   getMenuItems, 
@@ -7,7 +7,9 @@ import {
   uploadMenuItemImage, 
   getUsers, 
   updateUser, 
-  deleteUser 
+  deleteUser,
+  getOrders,
+  getOrderStats
 } from '../services/api';
 import { toast } from 'sonner';
 
@@ -16,6 +18,10 @@ interface AdminContextType {
   restaurants: Restaurant[];
   menuItems: MenuItem[];
   users: UserDto[];
+  orders: Order[];
+  totalOrders: number;
+  pendingOrders: number;
+  deliveredOrders: number;
   clients: UserDto[];
   livreurs: UserDto[];
   admins: UserDto[];
@@ -58,6 +64,43 @@ interface AdminContextType {
   currentRestaurant: Restaurant | undefined;
 }
 
+interface OrderStats {
+  totalOrders: number;
+  pendingOrders: number;
+  deliveredOrders: number;
+}
+
+const deriveOrderStats = (ordersData: Order[]): OrderStats => {
+  const pendingStatuses = new Set([
+    'PENDING',
+    'PLACED',
+    'ACCEPTED',
+    'PREPARING',
+    'READY_FOR_PICKUP',
+    'DELIVERING',
+    'IN_TRANSIT'
+  ]);
+  const deliveredStatuses = new Set(['DELIVERED']);
+
+  let pending = 0;
+  let delivered = 0;
+
+  for (const order of ordersData) {
+    const status = (order.status ?? '').toString().toUpperCase();
+    if (deliveredStatuses.has(status)) {
+      delivered += 1;
+    } else if (pendingStatuses.has(status)) {
+      pending += 1;
+    }
+  }
+
+  return {
+    totalOrders: ordersData.length,
+    pendingOrders: pending,
+    deliveredOrders: delivered
+  };
+};
+
 const AdminContext = createContext<AdminContextType | undefined>(undefined);
 
 export const AdminProvider = ({ children }: { children: ReactNode }) => {
@@ -66,6 +109,12 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [users, setUsers] = useState<UserDto[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [orderStats, setOrderStats] = useState<OrderStats>({
+    totalOrders: 0,
+    pendingOrders: 0,
+    deliveredOrders: 0
+  });
 
   const [isRestaurantDialogOpen, setIsRestaurantDialogOpen] = useState(false);
   const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
@@ -98,6 +147,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     email: '',
     role: ''
   });
+
 
   useEffect(() => {
     const fetchAllData = async () => {
@@ -143,14 +193,48 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
       }
     };
     fetchUsers();
+
+    const fetchOrders = async () => {
+      try {
+        const response = await getOrders();
+        const fetchedOrders = response.data;
+        setOrders(fetchedOrders);
+        const fallbackStats = deriveOrderStats(fetchedOrders);
+        setOrderStats(fallbackStats);
+
+        try {
+          const statsResponse = await getOrderStats();
+          const serverStats = statsResponse.data;
+          if (
+            fetchedOrders.length === 0 ||
+            serverStats.totalOrders > 0 ||
+            serverStats.pendingOrders > 0 ||
+            serverStats.deliveredOrders > 0
+          ) {
+            setOrderStats(serverStats);
+          }
+        } catch (error) {
+          console.error('Failed to fetch order stats', error);
+          setOrderStats(fallbackStats);
+        }
+      } catch (error) {
+        console.error('Failed to fetch orders', error);
+        toast.error('Failed to load orders');
+        setOrderStats({
+          totalOrders: 0,
+          pendingOrders: 0,
+          deliveredOrders: 0
+        });
+      }
+    };
+    fetchOrders();
   }, []);
-
-
 
   // Calculate statistics
   const clients = users.filter(u => u.role === 'ROLE_CUSTOMER');
   const livreurs = users.filter(u => u.role === 'ROLE_DRIVER');
   const admins = users.filter(u => u.role === 'ROLE_ADMIN');
+  const { totalOrders, pendingOrders, deliveredOrders } = orderStats;
 
   const handleAddRestaurant = () => {
     setEditingRestaurant(null);
@@ -346,6 +430,10 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     restaurants,
     menuItems,
     users,
+    orders,
+    totalOrders,
+    pendingOrders,
+    deliveredOrders,
     clients,
     livreurs,
     admins,

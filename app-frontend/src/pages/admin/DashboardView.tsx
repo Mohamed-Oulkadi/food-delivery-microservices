@@ -3,7 +3,7 @@ import { Users, Store, Bike } from 'lucide-react';
 import { useAdmin } from '../../contexts/AdminProvider';
 
 export const DashboardView = () => {
-  const { users, restaurants, menuItems } = useAdmin();
+  const { users, restaurants, menuItems, totalOrders, pendingOrders, deliveredOrders } = useAdmin();
   const clients = users.filter(u => u.role === 'ROLE_CUSTOMER');
   const livreurs = users.filter(u => u.role === 'ROLE_DRIVER');
   const admins = users.filter(u => u.role === 'ROLE_ADMIN');
@@ -82,39 +82,27 @@ export const DashboardView = () => {
       </div>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity Card */}
+        {/* Order Stats Card */}
         <Card className="shadow-sm">
           <CardHeader className="border-b">
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
+            <CardTitle className="text-lg">Order Stats</CardTitle>
           </CardHeader>
           <CardContent className="pt-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
-                <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">
-                    {restaurants.length} Restaurants Registered
-                  </p>
-                  <p className="text-xs text-gray-500">Active partner restaurants</p>
-                </div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="p-4 rounded-xl border border-blue-100 bg-blue-50">
+                <p className="text-sm text-blue-800 font-medium">Total Orders</p>
+                <p className="text-3xl font-bold text-blue-900 mt-2">{totalOrders}</p>
+                <p className="text-xs text-blue-700 mt-1">All time orders</p>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">
-                    {clients.length} Active Clients
-                  </p>
-                  <p className="text-xs text-gray-500">Platform users</p>
-                </div>
+              <div className="p-4 rounded-xl border border-orange-100 bg-orange-50">
+                <p className="text-sm text-orange-800 font-medium">Pending Orders</p>
+                <p className="text-3xl font-bold text-orange-900 mt-2">{pendingOrders}</p>
+                <p className="text-xs text-orange-700 mt-1">Awaiting fulfilment</p>
               </div>
-              <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
-                <div className="h-3 w-3 rounded-full bg-orange-500"></div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">
-                    {livreurs.length} Delivery Personnel
-                  </p>
-                  <p className="text-xs text-gray-500">Available livreurs</p>
-                </div>
+              <div className="p-4 rounded-xl border border-green-100 bg-green-50">
+                <p className="text-sm text-green-800 font-medium">Delivered Orders</p>
+                <p className="text-3xl font-bold text-green-900 mt-2">{deliveredOrders}</p>
+                <p className="text-xs text-green-700 mt-1">Completed deliveries</p>
               </div>
             </div>
           </CardContent>
