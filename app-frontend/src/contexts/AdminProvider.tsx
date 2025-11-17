@@ -100,19 +100,32 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   });
 
   useEffect(() => {
-    const fetchRestaurants = async () => {
+    const fetchAllData = async () => {
       setIsLoading(true);
       try {
-        const response = await getRestaurants();
-        setRestaurants(response.data);
+        const restaurantResponse = await getRestaurants();
+        const restaurants = restaurantResponse.data;
+        setRestaurants(restaurants);
+
+        const allMenuItems: MenuItem[] = [];
+        for (const restaurant of restaurants) {
+          try {
+            const menuItemsResponse = await getMenuItems(restaurant.restaurantId);
+            allMenuItems.push(...menuItemsResponse.data);
+          } catch (error) {
+            console.error(`Failed to fetch menu items for restaurant ${restaurant.restaurantId}`, error);
+          }
+        }
+        setMenuItems(allMenuItems);
+
       } catch (error) {
-        console.error('Failed to fetch restaurants', error);
-        toast.error('Failed to load restaurants');
+        console.error('Failed to fetch data', error);
+        toast.error('Failed to load data');
       } finally {
         setIsLoading(false);
       }
     };
-    fetchRestaurants();
+    fetchAllData();
   }, []);
 
   useEffect(() => {
@@ -128,24 +141,11 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     fetchUsers();
   }, []);
 
-  useEffect(() => {
-    const fetchMenuItems = async () => {
-      if (selectedRestaurantId) {
-        try {
-          const response = await getMenuItems(selectedRestaurantId);
-          setMenuItems(response.data);
-        } catch (error) {
-          console.error('Failed to fetch menu items', error);
-          toast.error('Failed to load menu items');
-        }
-      }
-    };
-    fetchMenuItems();
-  }, [selectedRestaurantId]);
+
 
   // Calculate statistics
-  const clients = users.filter(u => u.role === 'ROLE_CLIENT' || u.role === 'ROLE_USER');
-  const livreurs = users.filter(u => u.role === 'ROLE_LIVREUR' || u.role === 'ROLE_DELIVERY');
+  const clients = users.filter(u => u.role === 'ROLE_CUSTOMER');
+  const livreurs = users.filter(u => u.role === 'ROLE_DRIVER');
   const admins = users.filter(u => u.role === 'ROLE_ADMIN');
 
   const handleAddRestaurant = () => {

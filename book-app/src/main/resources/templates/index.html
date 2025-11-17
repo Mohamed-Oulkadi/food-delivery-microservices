@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Gestionnaire de Livres</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .book-card { transition: transform 0.2s; }
+        .book-card:hover { transform: translateY(-5px); }
+        .graphql-section { background-color: #f8f9fa; border-radius: 10px; padding: 20px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand" href="/">BookApp GraphQL</a>
+    </div>
+</nav>
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center">Gestionnaire de Livres avec GraphQL</h1>
+            <p class="text-center text-muted">Application avec API GraphQL</p>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"> <h5>Rechercher des livres</h5> </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" id="searchInput" class="form-control" placeholder="Titre du livre...">
+                        <button class="btn btn-primary" onclick="searchBooks()">Rechercher</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header"><h5>Filtre par catégorie</h5></div>
+                <div class="card-body">
+                    <select id="categoryFilter" class="form-select" onchange="filterByCategory()">
+                        <option value="">Toutes les catégories</option>
+                        <option value="FICTION">Fiction</option>
+                        <option value="TECHNOLOGY">Technologie</option>
+                        <option value="HISTORY">Histoire</option>
+                        <option value="SCIENCE">Science</option>
+                        <option value="BIOGRAPHY">Biographie</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header"> <h5>Ajouter un nouveau livre</h5></div>
+                <div class="card-body">
+                    <form id="addBookForm">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="title" placeholder="Titre" required>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control" id="author" placeholder="Auteur" required>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="number" class="form-control" id="price" placeholder="Prix" step="0.01" required>
+                            </div>
+                            <div class="col-md-2">
+                                <input type="text" class="form-control" id="isbn" placeholder="ISBN" required>
+                            </div>
+                            <div class="col-md-2">
+                                <select class="form-select" id="category" required>
+                                    <option value="">Catégorie</option>
+                                    <option value="FICTION">Fiction</option>
+                                    <option value="TECHNOLOGY">Technologie</option>
+                                    <option value="HISTORY">Histoire</option>
+                                    <option value="SCIENCE">Science</option>
+                                    <option value="BIOGRAPHY">Biographie</option>
+                                </select>
+                            </div>
+                            <div class="col-md-1">
+                                <button type="submit" class="btn btn-success">Ajouter</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <h3>Liste des Livres</h3>
+            <div id="booksList" class="row">
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-12">
+            <div class="graphql-section">
+                <h4>Console GraphQL Interactive</h4>
+                <p>Testez vos requêtes GraphQL directement :</p>
+                <a href="/graphql-ui" class="btn btn-outline-primary">Ouvrir GraphQL</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/js/app.js"></script>
+</body>
+</html>

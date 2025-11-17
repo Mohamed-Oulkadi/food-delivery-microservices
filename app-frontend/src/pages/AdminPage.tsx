@@ -1,8 +1,6 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Link, useLocation, Outlet } from 'react-router-dom';
 import { 
-  Plus, 
-  Pencil, 
-  Trash2, 
   LayoutDashboard, 
   Users, 
   Store, 
@@ -11,7 +9,7 @@ import {
   X
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import { useAdmin } from '../contexts/AdminProvider';
 import {
   Dialog,
   DialogContent,
@@ -22,708 +20,49 @@ import {
 } from '../components/ui/dialog';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '../components/ui/table';
-import { Restaurant, MenuItem, UserDto } from '../lib/mockData';
-import { 
-  getRestaurants, 
-  getMenuItems, 
-  uploadRestaurantImage, 
-  uploadMenuItemImage, 
-  getUsers, 
-  updateUser, 
-  deleteUser 
-} from '../services/api';
-import { toast } from 'sonner';
-
-type ViewType = 'dashboard' | 'clients' | 'restaurants' | 'livreurs';
+import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
+import React from 'react';
 
 export const AdminPage: React.FC = () => {
-  const [currentView, setCurrentView] = useState<ViewType>('dashboard');
+  const location = useLocation();
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-  const [isLoading, setIsLoading] = useState(false);
   
-  const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
-  const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
-  const [users, setUsers] = useState<UserDto[]>([]);
+  const {
+    isRestaurantDialogOpen,
+    setIsRestaurantDialogOpen,
+    editingRestaurant,
+    restaurantForm,
+    setRestaurantForm,
+    selectedFile,
+    setSelectedFile,
+    handleSaveRestaurant,
+    isUserDialogOpen,
+    setIsUserDialogOpen,
+    editingUser,
+    userForm,
+    setUserForm,
+    handleSaveUser,
+    isMenuDialogOpen,
+    setIsMenuDialogOpen,
+    currentRestaurant,
+    menuItemForm,
+    setMenuItemForm,
+    selectedMenuItemFile,
+    setSelectedMenuItemFile,
+    editingMenuItem,
+    setEditingMenuItem,
+    handleAddMenuItem,
+    currentRestaurantMenuItems,
+    handleEditMenuItem,
+    handleDeleteMenuItem,
+  } = useAdmin();
 
-  const [isRestaurantDialogOpen, setIsRestaurantDialogOpen] = useState(false);
-  const [editingRestaurant, setEditingRestaurant] = useState<Restaurant | null>(null);
-  const [isMenuDialogOpen, setIsMenuDialogOpen] = useState(false);
-  const [editingMenuItem, setEditingMenuItem] = useState<MenuItem | null>(null);
-  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<UserDto | null>(null);
-
-  const [selectedRestaurantId, setSelectedRestaurantId] = useState<string>('');
-
-  // Restaurant form state
-  const [restaurantForm, setRestaurantForm] = useState({
-    name: '',
-    cuisineType: '',
-    address: ''
-  });
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [selectedMenuItemFile, setSelectedMenuItemFile] = useState<File | null>(null);
-
-  // Menu item form state
-  const [menuItemForm, setMenuItemForm] = useState({
-    name: '',
-    description: '',
-    price: ''
-  });
-
-  // User form state
-  const [userForm, setUserForm] = useState({
-    username: '',
-    email: '',
-    role: ''
-  });
-
-  useEffect(() => {
-    const fetchRestaurants = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getRestaurants();
-        setRestaurants(response.data);
-      } catch (error) {
-        console.error('Failed to fetch restaurants', error);
-        toast.error('Failed to load restaurants');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchRestaurants();
-  }, []);
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const response = await getUsers();
-        setUsers(response.data);
-      } catch (error) {
-        console.error('Failed to fetch users', error);
-        toast.error('Failed to load users');
-      }
-    };
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    const fetchMenuItems = async () => {
-      if (selectedRestaurantId) {
-        try {
-          const response = await getMenuItems(selectedRestaurantId);
-          setMenuItems(response.data);
-        } catch (error) {
-          console.error('Failed to fetch menu items', error);
-          toast.error('Failed to load menu items');
-        }
-      }
-    };
-    fetchMenuItems();
-  }, [selectedRestaurantId]);
-
-  // Calculate statistics
-  const clients = users.filter(u => u.role === 'ROLE_CLIENT' || u.role === 'ROLE_USER');
-  const livreurs = users.filter(u => u.role === 'ROLE_LIVREUR' || u.role === 'ROLE_DELIVERY');
-  const admins = users.filter(u => u.role === 'ROLE_ADMIN');
-
-  const handleAddRestaurant = () => {
-    setEditingRestaurant(null);
-    setRestaurantForm({ name: '', cuisineType: '', address: '' });
-    setSelectedFile(null);
-    setIsRestaurantDialogOpen(true);
-  };
-
-  const handleEditRestaurant = (restaurant: Restaurant) => {
-    setEditingRestaurant(restaurant);
-    setRestaurantForm({
-      name: restaurant.name,
-      cuisineType: restaurant.cuisineType,
-      address: restaurant.address
-    });
-    setSelectedFile(null);
-    setIsRestaurantDialogOpen(true);
-  };
-
-  const handleSaveRestaurant = async () => {
-    if (!restaurantForm.name || !restaurantForm.cuisineType || !restaurantForm.address) {
-      toast.error('Please fill in all fields');
-      return;
-    }
-
-    try {
-      if (editingRestaurant) {
-        const updatedRestaurant = { ...editingRestaurant, ...restaurantForm };
-        if (selectedFile) {
-          const imageUrl = await uploadRestaurantImage(editingRestaurant.restaurantId, selectedFile);
-          updatedRestaurant.imageUrl = imageUrl.data;
-        }
-        setRestaurants(prev =>
-          prev.map(r => r.restaurantId === editingRestaurant.restaurantId
-            ? updatedRestaurant
-            : r
-          )
-        );
-        toast.success('Restaurant updated successfully');
-      } else {
-        const newRestaurantWithId: Restaurant = {
-          restaurantId: `${Date.now()}`,
-          ...restaurantForm,
-          imageUrl: '',
-          rating: 4.5,
-          deliveryTime: '30-40 min'
-        };
-
-        if (selectedFile) {
-          try {
-            const imageUrl = await uploadRestaurantImage(newRestaurantWithId.restaurantId, selectedFile);
-            newRestaurantWithId.imageUrl = imageUrl.data;
-          } catch (error) {
-            toast.error('Failed to upload image. Restaurant created without an image.');
-          }
-        }
-
-        setRestaurants(prev => [...prev, newRestaurantWithId]);
-        toast.success('Restaurant added successfully');
-      }
-
-      setIsRestaurantDialogOpen(false);
-    } catch (error) {
-      toast.error('Failed to save restaurant');
-    }
-  };
-
-  const handleDeleteRestaurant = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this restaurant?')) {
-      setRestaurants(prev => prev.filter(r => r.restaurantId !== id));
-      setMenuItems(prev => prev.filter(m => m.restaurantId !== id));
-      toast.success('Restaurant deleted successfully');
-    }
-  };
-
-  const handleManageMenu = (restaurantId: string) => {
-    setSelectedRestaurantId(restaurantId);
-    setEditingMenuItem(null);
-    setMenuItemForm({ name: '', description: '', price: '' });
-    setSelectedMenuItemFile(null);
-    setIsMenuDialogOpen(true);
-  };
-
-  const handleAddMenuItem = async () => {
-    if (!menuItemForm.name || !menuItemForm.description || !menuItemForm.price) {
-      toast.error('Please fill in all fields');
-      return;
-    }
-
-    try {
-      if (editingMenuItem) {
-        const updatedMenuItem = { 
-          ...editingMenuItem, 
-          ...menuItemForm, 
-          price: parseFloat(menuItemForm.price) 
-        };
-        if (selectedMenuItemFile) {
-          const imageUrl = await uploadMenuItemImage(editingMenuItem.id, selectedMenuItemFile);
-          updatedMenuItem.imageUrl = imageUrl.data;
-        }
-        setMenuItems(prev =>
-          prev.map(m => m.id === editingMenuItem.id ? updatedMenuItem : m)
-        );
-        toast.success('Menu item updated successfully');
-      } else {
-        const newMenuItemWithId: MenuItem = {
-          id: `m${Date.now()}`,
-          restaurantId: selectedRestaurantId,
-          name: menuItemForm.name,
-          description: menuItemForm.description,
-          price: parseFloat(menuItemForm.price),
-          imageUrl: '',
-        };
-
-        if (selectedMenuItemFile) {
-          try {
-            const imageUrl = await uploadMenuItemImage(newMenuItemWithId.id, selectedMenuItemFile);
-            newMenuItemWithId.imageUrl = imageUrl.data;
-          } catch (error) {
-            toast.error('Failed to upload image. Menu item created without an image.');
-          }
-        }
-
-        setMenuItems(prev => [...prev, newMenuItemWithId]);
-        toast.success('Menu item added successfully');
-      }
-
-      setMenuItemForm({ name: '', description: '', price: '' });
-      setEditingMenuItem(null);
-      setSelectedMenuItemFile(null);
-    } catch (error) {
-      toast.error('Failed to save menu item');
-    }
-  };
-
-  const handleEditMenuItem = (menuItem: MenuItem) => {
-    setEditingMenuItem(menuItem);
-    setMenuItemForm({
-      name: menuItem.name,
-      description: menuItem.description,
-      price: menuItem.price.toString()
-    });
-    setSelectedMenuItemFile(null);
-  };
-
-  const handleDeleteMenuItem = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this menu item?')) {
-      setMenuItems(prev => prev.filter(m => m.id !== id));
-      toast.success('Menu item deleted successfully');
-    }
-  };
-
-  const handleEditUser = (user: UserDto) => {
-    setEditingUser(user);
-    setUserForm({
-      username: user.username,
-      email: user.email,
-      role: user.role
-    });
-    setIsUserDialogOpen(true);
-  };
-
-  const handleSaveUser = async () => {
-    if (!editingUser) return;
-
-    try {
-      const updatedUser = await updateUser(editingUser.userId, { ...editingUser, ...userForm });
-      setUsers(prev => prev.map(u => u.userId === editingUser.userId ? updatedUser.data : u));
-      toast.success('User updated successfully');
-      setIsUserDialogOpen(false);
-    } catch (error) {
-      toast.error('Failed to update user');
-    }
-  };
-
-  const handleDeleteUser = async (id: number) => {
-    if (window.confirm('Are you sure you want to delete this user?')) {
-      try {
-        await deleteUser(id);
-        setUsers(prev => prev.filter(u => u.userId !== id));
-        toast.success('User deleted successfully');
-      } catch (error) {
-        toast.error('Failed to delete user');
-      }
-    }
-  };
-
-  const currentRestaurantMenuItems = menuItems.filter(m => m.restaurantId === selectedRestaurantId);
-  const currentRestaurant = restaurants.find(r => r.restaurantId === selectedRestaurantId);
-
-  // Sidebar navigation items
   const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'clients', label: 'Clients', icon: Users },
-    { id: 'restaurants', label: 'Restaurants', icon: Store },
-    { id: 'livreurs', label: 'Livreurs', icon: Bike },
+    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, path: '/admin/dashboard' },
+    { id: 'clients', label: 'Clients', icon: Users, path: '/admin/clients' },
+    { id: 'restaurants', label: 'Restaurants', icon: Store, path: '/admin/restaurants' },
+    { id: 'livreurs', label: 'Livreurs', icon: Bike, path: '/admin/livreurs' },
   ];
-
-  // Statistics Cards Component
-  const StatisticsCards = () => (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-      {/* Total Clients Card */}
-      <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-blue-500">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Clients</p>
-              <h3 className="text-3xl font-bold text-gray-900">{clients.length}</h3>
-              <p className="text-xs text-gray-500 mt-1">Active users on platform</p>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center">
-              <Users className="h-6 w-6 text-blue-600" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Total Restaurants Card */}
-      <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-green-500">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Restaurants</p>
-              <h3 className="text-3xl font-bold text-gray-900">{restaurants.length}</h3>
-              <p className="text-xs text-gray-500 mt-1">Partner restaurants</p>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-green-100 flex items-center justify-center">
-              <Store className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Total Livreurs Card */}
-      <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-orange-500">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Livreurs</p>
-              <h3 className="text-3xl font-bold text-gray-900">{livreurs.length}</h3>
-              <p className="text-xs text-gray-500 mt-1">Delivery personnel available</p>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-orange-100 flex items-center justify-center">
-              <Bike className="h-6 w-6 text-orange-600" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Total Users Card */}
-      <Card className="hover:shadow-lg transition-shadow border-l-4 border-l-purple-500">
-        <CardContent className="pt-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600 mb-1">Total Users</p>
-              <h3 className="text-3xl font-bold text-gray-900">{users.length}</h3>
-              <p className="text-xs text-gray-500 mt-1">All registered users</p>
-            </div>
-            <div className="h-12 w-12 rounded-full bg-purple-100 flex items-center justify-center">
-              <Users className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
-  // Dashboard View
-  const DashboardView = () => (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-3xl font-bold text-gray-900">Dashboard Overview</h2>
-        <p className="text-gray-600 mt-1">Welcome back! Here's what's happening with your platform.</p>
-      </div>
-      
-      <StatisticsCards />
-      
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="border-b">
-            <CardTitle className="text-lg">Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-3">
-              <div className="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-100">
-                <div className="h-3 w-3 rounded-full bg-green-500"></div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">
-                    {restaurants.length} Restaurants Registered
-                  </p>
-                  <p className="text-xs text-gray-500">Active partner restaurants</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-100">
-                <div className="h-3 w-3 rounded-full bg-blue-500"></div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">
-                    {clients.length} Active Clients
-                  </p>
-                  <p className="text-xs text-gray-500">Platform users</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-100">
-                <div className="h-3 w-3 rounded-full bg-orange-500"></div>
-                <div>
-                  <p className="text-sm text-gray-700 font-medium">
-                    {livreurs.length} Delivery Personnel
-                  </p>
-                  <p className="text-xs text-gray-500">Available livreurs</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Stats Card */}
-        <Card className="shadow-sm">
-          <CardHeader className="border-b">
-            <CardTitle className="text-lg">Quick Stats</CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <div className="space-y-4">
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700 font-medium">Total Menu Items</span>
-                <span className="text-2xl font-bold text-gray-900">{menuItems.length}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700 font-medium">System Admins</span>
-                <span className="text-2xl font-bold text-gray-900">{admins.length}</span>
-              </div>
-              <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                <span className="text-sm text-gray-700 font-medium">Avg. Items/Restaurant</span>
-                <span className="text-2xl font-bold text-gray-900">
-                  {restaurants.length > 0 ? (menuItems.length / restaurants.length).toFixed(1) : '0.0'}
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
-  );
-
-  // Clients View
-  const ClientsView = () => (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Client Management</h2>
-          <p className="text-sm text-gray-600 mt-1">Manage all client accounts</p>
-        </div>
-        <div className="text-sm text-gray-600 bg-blue-50 px-4 py-2 rounded-lg border border-blue-200">
-          <span className="font-semibold text-blue-700">{clients.length}</span> total clients
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {clients.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                      No clients found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  clients.map(user => (
-                    <TableRow key={user.userId} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="font-medium">{user.userId}</TableCell>
-                      <TableCell>{user.username}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
-                          {user.role.replace('ROLE_', '')}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditUser(user)}
-                            className="hover:bg-green-50"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteUser(user.userId)}
-                            className="hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-
-  // Restaurants View
-  const RestaurantsView = () => (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Restaurant Management</h2>
-          <p className="text-sm text-gray-600 mt-1">Manage partner restaurants and menus</p>
-        </div>
-        <Button onClick={handleAddRestaurant} className="bg-green-600 hover:bg-green-700">
-          <Plus className="h-4 w-4 mr-2" />
-          Add Restaurant
-        </Button>
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Cuisine Type</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {restaurants.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                      No restaurants found. Click "Add Restaurant" to create one.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  restaurants.map(restaurant => (
-                    <TableRow key={restaurant.restaurantId} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="font-medium">{restaurant.restaurantId}</TableCell>
-                      <TableCell className="font-semibold">{restaurant.name}</TableCell>
-                      <TableCell>
-                        <span className="px-2 py-1 bg-green-100 text-green-700 text-xs rounded-full font-medium">
-                          {restaurant.cuisineType}
-                        </span>
-                      </TableCell>
-                      <TableCell className="max-w-xs truncate" title={restaurant.address}>
-                        {restaurant.address}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleManageMenu(restaurant.restaurantId)}
-                            className="hover:bg-green-50"
-                          >
-                            Menu
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditRestaurant(restaurant)}
-                            className="hover:bg-blue-50"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteRestaurant(restaurant.restaurantId)}
-                            className="hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
-
-  // Livreurs View
-  const LivreursView = () => (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">Livreur Management</h2>
-          <p className="text-sm text-gray-600 mt-1">Manage delivery personnel</p>
-        </div>
-        <div className="text-sm text-gray-600 bg-orange-50 px-4 py-2 rounded-lg border border-orange-200">
-          <span className="font-semibold text-orange-700">{livreurs.length}</span> total livreurs
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-green-600"></div>
-        </div>
-      ) : (
-        <Card>
-          <CardContent className="pt-6">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>ID</TableHead>
-                  <TableHead>Username</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {livreurs.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8 text-gray-500">
-                      No delivery personnel found
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  livreurs.map(user => (
-                    <TableRow key={user.userId} className="hover:bg-gray-50 transition-colors">
-                      <TableCell className="font-medium">{user.userId}</TableCell>
-                      <TableCell>{user.username}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>
-                        <span className="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full font-medium">
-                          {user.role.replace('ROLE_', '')}
-                        </span>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex gap-2 justify-end">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleEditUser(user)}
-                            className="hover:bg-green-50"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleDeleteUser(user.userId)}
-                            className="hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4 text-red-500" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </CardContent>
-        </Card>
-      )}
-    </div>
-  );
 
   return (
     <div className="flex h-screen bg-slate-50">
@@ -758,18 +97,18 @@ export const AdminPage: React.FC = () => {
           {navigationItems.map(item => {
             const Icon = item.icon;
             return (
-              <button
+              <Link
                 key={item.id}
-                onClick={() => setCurrentView(item.id as ViewType)}
+                to={item.path}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
-                  currentView === item.id
+                  location.pathname === item.path
                     ? 'bg-green-50 text-green-700 font-semibold shadow-sm'
                     : 'text-slate-700 hover:bg-slate-50'
                 }`}
               >
                 <Icon className="h-5 w-5 flex-shrink-0" />
                 {isSidebarOpen && <span>{item.label}</span>}
-              </button>
+              </Link>
             );
           })}
         </nav>
@@ -791,17 +130,13 @@ export const AdminPage: React.FC = () => {
         <main className="flex-1 overflow-y-auto">
           <div className="p-8">
             <div className="max-w-7xl mx-auto">
-              {currentView === 'dashboard' && <DashboardView />}
-              {currentView === 'clients' && <ClientsView />}
-              {currentView === 'restaurants' && <RestaurantsView />}
-              {currentView === 'livreurs' && <LivreursView />}
+              <Outlet />
             </div>
           </div>
         </main>
       </div>
 
-      {/* Dialogs remain the same */}
-      {/* Restaurant Dialog */}
+      {/* Dialogs */}
       <Dialog open={isRestaurantDialogOpen} onOpenChange={setIsRestaurantDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -864,7 +199,6 @@ export const AdminPage: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* User Dialog */}
       <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -910,7 +244,6 @@ export const AdminPage: React.FC = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Menu Dialog */}
       <Dialog open={isMenuDialogOpen} onOpenChange={setIsMenuDialogOpen}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -975,7 +308,6 @@ export const AdminPage: React.FC = () => {
                     onClick={handleAddMenuItem} 
                     className="bg-green-600 hover:bg-green-700 flex-1"
                   >
-                    <Plus className="h-4 w-4 mr-2" />
                     {editingMenuItem ? 'Update Item' : 'Add Item'}
                   </Button>
                   {editingMenuItem && (
@@ -1019,7 +351,6 @@ export const AdminPage: React.FC = () => {
                           onClick={() => handleEditMenuItem(item)}
                           className="hover:bg-blue-50"
                         >
-                          <Pencil className="h-4 w-4" />
                         </Button>
                         <Button
                           size="sm"
@@ -1027,7 +358,6 @@ export const AdminPage: React.FC = () => {
                           onClick={() => handleDeleteMenuItem(item.id)}
                           className="hover:bg-red-50"
                         >
-                          <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       </div>
                     </div>

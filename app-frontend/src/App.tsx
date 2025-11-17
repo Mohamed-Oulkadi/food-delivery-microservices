@@ -8,10 +8,10 @@ import { RegisterPage } from './pages/RegisterPage';
 import { CustomerHome } from './pages/CustomerHome';
 import { RestaurantMenu } from './pages/RestaurantMenu';
 import { MyOrders } from './pages/MyOrders';
-import { AdminPage } from './pages/AdminPage';
 import { DriverDashboard } from './pages/DriverDashboard';
 import { Toaster } from './components/ui/sonner';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { AdminRoutes } from './components/AdminRoutes';
 
 const AppContent = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -36,13 +36,7 @@ const AppContent = () => {
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN']} />}>
-          <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
-          <Route
-            path="/admin/*"
-            element={
-              <AdminPage />
-            }
-          />
+          <Route path="/admin/*" element={<AdminRoutes />} />
         </Route>
 
         <Route element={<ProtectedRoute allowedRoles={['ROLE_DRIVER']} />}>
@@ -54,7 +48,7 @@ const AppContent = () => {
       {user?.role === 'ROLE_CUSTOMER' && (
         <CartSheet open={isCartOpen} onOpenChange={setIsCartOpen} />
       )}
-      <Toaster position="top-right" />
+      <Toaster position="top-right"/>
     </div>
   );
 };

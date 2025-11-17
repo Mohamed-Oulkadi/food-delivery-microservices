@@ -1,1 +1,28 @@
-{"name":"My New Restaurant","cuisineType":"Italian","imageUrl":"/uploads/dafabe7d-4031-4079-b176-38975cdd3516.txt"}
+{
+  "name": "My New Restaurant",
+  "cuisineType": "Italian",
+  "imageUrl": "/uploads/dafabe7d-4031-4079-b176-38975cdd3516.txt",
+  "menuItems": [
+    {
+      "id": "m1",
+      "name": "Margherita Pizza",
+      "description": "Classic pizza with tomato, mozzarella, and basil",
+      "price": 12.99,
+      "imageUrl": "/images/margherita.jpg"
+    },
+    {
+      "id": "m2",
+      "name": "Pasta Carbonara",
+      "description": "Spaghetti with egg, hard cheese, cured pork, and black pepper",
+      "price": 15.50,
+      "imageUrl": "/images/carbonara.jpg"
+    },
+    {
+      "id": "m3",
+      "name": "Tiramisu",
+      "description": "Coffee-flavored Italian dessert",
+      "price": 7.00,
+      "imageUrl": "/images/tiramisu.jpg"
+    }
+  ]
+}

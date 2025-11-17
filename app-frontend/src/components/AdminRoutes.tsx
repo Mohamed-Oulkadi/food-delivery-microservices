@@ -1,24 +1,22 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import {
-  DashboardView,
-  ClientsView,
-  RestaurantsView,
-  LivreursView,
-} from '../pages/AdminViews';
-import { AdminLayout } from '../pages/AdminLayout';
+import { Route, Routes } from "react-router-dom";
+import { AdminPage } from "../pages/AdminPage";
+import { DashboardView } from "../pages/admin/DashboardView";
+import { ClientsView } from "../pages/admin/ClientsView";
+import { RestaurantsView } from "../pages/admin/RestaurantsView";
+import { LivreursView } from "../pages/admin/LivreursView";
+import { AdminProvider } from "../contexts/AdminProvider";
 
 export const AdminRoutes = () => {
   return (
-    <Routes>
-      <Route element={<AdminLayout />}>
-        <Route index element={<Navigate to="dashboard" replace />} />
-        <Route path="dashboard" element={<DashboardView />} />
-        <Route path="clients" element={<ClientsView />} />
-        <Route path="restaurants" element={<RestaurantsView />} />
-        <Route path="livreurs" element={<LivreursView />} />
-        <Route path="*" element={<Navigate to="dashboard" replace />} />
-      </Route>
-    </Routes>
+    <AdminProvider>
+      <Routes>
+        <Route path="/" element={<AdminPage />}>
+          <Route path="dashboard" element={<DashboardView />} />
+          <Route path="clients" element={<ClientsView />} />
+          <Route path="restaurants" element={<RestaurantsView />} />
+          <Route path="livreurs" element={<LivreursView />} />
+        </Route>
+      </Routes>
+    </AdminProvider>
   );
 };
-

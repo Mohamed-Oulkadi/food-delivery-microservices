@@ -1,0 +1,44 @@
+type Book {
+    id: ID!
+    title: String!
+    author: String!
+    price: Float!
+    isbn: String!
+    category: Category!
+}
+
+enum Category {
+    FICTION
+    SCIENCE
+    TECHNOLOGY
+    HISTORY
+    BIOGRAPHY
+}
+
+type Query {
+    getAllBooks: [Book!]!
+    getBookById(id: ID!): Book
+    getBooksByCategory(category: Category!): [Book!]!
+    searchBooks(title: String!): [Book!]!
+}
+
+type Mutation {
+    createBook(
+        title: String!
+        author: String!
+        price: Float!
+        isbn: String!
+        category: Category!
+    ): Book!
+
+    updateBook(
+        id: ID!
+        title: String
+        author: String
+        price: Float
+        isbn: String
+        category: Category
+    ): Book
+
+    deleteBook(id: ID!): Boolean!
+}
