@@ -6,7 +6,9 @@ import {
   Store, 
   Bike,
   Menu,
-  X
+  X,
+  Pencil,
+  Trash2
 } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import { useAdmin } from '../contexts/AdminProvider';
@@ -246,6 +248,8 @@ export const AdminPage: React.FC = () => {
       </Dialog>
 
       <Dialog open={isMenuDialogOpen} onOpenChange={setIsMenuDialogOpen}>
+        {console.log('AdminPage: isMenuDialogOpen', isMenuDialogOpen)}
+        {console.log('AdminPage: currentRestaurant', currentRestaurant)}
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Manage Menu - {currentRestaurant?.name}</DialogTitle>

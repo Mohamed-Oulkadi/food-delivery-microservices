@@ -344,11 +344,13 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleManageMenu = (restaurantId: string) => {
+    console.log('handleManageMenu called with restaurantId:', restaurantId);
     setSelectedRestaurantId(restaurantId);
     setEditingMenuItem(null);
     setMenuItemForm({ name: '', description: '', price: '' });
     setSelectedMenuItemFile(null);
     setIsMenuDialogOpen(true);
+    console.log('isMenuDialogOpen set to true');
   };
 
   const handleAddMenuItem = async () => {
