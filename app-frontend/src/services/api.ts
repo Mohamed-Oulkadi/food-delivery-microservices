@@ -50,6 +50,11 @@ export const uploadMenuItemImage = (menuItemId: string, file: File) => {
   });
 };
 
+export const deleteRestaurant = (id: string) => restaurantService.delete(`/${id}`);
+export const createRestaurant = (restaurant: Omit<Restaurant, 'restaurantId' | 'imageUrl' | 'rating' | 'deliveryTime'>) => restaurantService.post<Restaurant>('', restaurant);
+export const updateRestaurant = (id: string, restaurant: Partial<Restaurant>) => restaurantService.put<Restaurant>(`/${id}`, restaurant);
+export const rateRestaurant = (restaurantId: string, rating: number) => restaurantService.put<Restaurant>(`/${restaurantId}/rate`, { rating });
+
 // Order Service
 export const createOrder = (order: Omit<Order, 'id' | 'status' | 'date'>) => orderService.post<Order>('', order);
 export const getOrderById = (id: string) => orderService.get<Order>(`/${id}`);

@@ -71,8 +71,9 @@ public class RestaurantService {
         existingRestaurant.setName(restaurantDto.getName());
         existingRestaurant.setCuisineType(restaurantDto.getCuisineType());
         existingRestaurant.setImageUrl(restaurantDto.getImageUrl());
-    existingRestaurant.setRating(restaurantDto.getRating());
-    existingRestaurant.setDeliveryTime(restaurantDto.getDeliveryTime());
+        existingRestaurant.setRating(restaurantDto.getRating());
+        existingRestaurant.setDeliveryTime(restaurantDto.getDeliveryTime());
+        existingRestaurant.setAddress(restaurantDto.getAddress());
         return restaurantRepository.save(existingRestaurant);
     }
 

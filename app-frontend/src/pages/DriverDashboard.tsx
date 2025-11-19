@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '../components/ui/select';
-import { Delivery } from '../lib/mockData';
 import { toast } from 'sonner@2.0.3';
 import { useApp } from '../contexts/AppContext';
 import {
@@ -20,6 +19,15 @@ import {
   updateDeliveryStatus as updateDeliveryStatusApi,
 } from '../services/api';
 
+interface Delivery {
+  deliveryId: number;
+  orderId: number;
+  customerAddress: string;
+  restaurantName: string;
+  status: 'PENDING' | 'ACCEPTED' | 'PICKED_UP' | 'IN_TRANSIT' | 'DELIVERED' | 'CANCELLED';
+  driverId?: number;
+}
+
 export const DriverDashboard: React.FC = () => {
   const { user } = useApp();
   const driverId = user?.id ?? '101';
@@ -27,16 +35,6 @@ export const DriverDashboard: React.FC = () => {
   const [pendingDeliveries, setPendingDeliveries] = useState<Delivery[]>([]);
   const [activeDeliveries, setActiveDeliveries] = useState<Delivery[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-
-  const normalizeDeliveries = (items: Delivery[]) =>
-    items.map(item => ({
-      ...item,
-      id:
-        item.id ??
-        (item.deliveryId ? String(item.deliveryId) : item.orderId ? String(item.orderId) : undefined),
-      orderId: typeof item.orderId === 'number' ? String(item.orderId) : item.orderId,
-      driverId: item.driverId != null ? String(item.driverId) : undefined,
-    }));
 
   const fetchDeliveries = useCallback(async () => {
     setIsLoading(true);
@@ -48,8 +46,8 @@ export const DriverDashboard: React.FC = () => {
 
       const [pendingRes, activeRes] = await Promise.all([pendingPromise, activePromise]);
 
-      setPendingDeliveries(normalizeDeliveries(pendingRes.data));
-      setActiveDeliveries(normalizeDeliveries(activeRes.data));
+      setPendingDeliveries(pendingRes.data);
+      setActiveDeliveries(activeRes.data);
     } catch (error) {
       console.error('Failed to load deliveries', error);
       toast.error('Failed to load deliveries');
@@ -67,11 +65,6 @@ export const DriverDashboard: React.FC = () => {
       toast.error('You must be logged in as a driver to accept deliveries');
       return;
     }
-    const resourceId = delivery.deliveryId ?? delivery.id;
-    if (!resourceId) {
-      toast.error('Missing delivery identifier');
-      return;
-    }
     const numericDriverId = Number(driverId);
     if (Number.isNaN(numericDriverId)) {
       toast.error('Invalid driver identifier');
@@ -79,7 +72,7 @@ export const DriverDashboard: React.FC = () => {
     }
 
     try {
-      await assignDelivery(resourceId, numericDriverId);
+      await assignDelivery(delivery.deliveryId, numericDriverId);
       toast.success('Delivery accepted successfully');
       fetchDeliveries();
     } catch (error) {
@@ -89,13 +82,8 @@ export const DriverDashboard: React.FC = () => {
   };
 
   const handleUpdateStatus = async (delivery: Delivery, newStatus: Delivery['status']) => {
-    const resourceId = delivery.deliveryId ?? delivery.id;
-    if (!resourceId) {
-      toast.error('Missing delivery identifier');
-      return;
-    }
     try {
-      await updateDeliveryStatusApi(String(resourceId), newStatus);
+      await updateDeliveryStatusApi(String(delivery.deliveryId), newStatus);
       toast.success(`Status updated to ${newStatus.replace('_', ' ')}`);
       fetchDeliveries();
     } catch (error) {
@@ -163,7 +151,7 @@ export const DriverDashboard: React.FC = () => {
                 <div className="space-y-4">
                   {availableDeliveries.map(delivery => (
                     <div
-                      key={delivery.id}
+                      key={delivery.deliveryId}
                       className="p-4 bg-gray-50 rounded-lg space-y-3"
                     >
                       <div className="flex items-start justify-between">
@@ -221,13 +209,13 @@ export const DriverDashboard: React.FC = () => {
                 <div className="space-y-4">
                   {myDeliveries.map(delivery => (
                     <div
-                      key={delivery.id}
+                      key={delivery.deliveryId}
                       className="p-4 bg-gray-50 rounded-lg space-y-3"
                     >
                       <div className="flex items-start justify-between">
                         <div>
                           <p className="text-gray-900">
-                            Delivery #{delivery.deliveryId ?? delivery.id}
+                            Delivery #{delivery.deliveryId}
                           </p>
                           <p className="text-sm text-gray-600">Order #{delivery.orderId}</p>
                           <p className="text-sm text-gray-600">{delivery.restaurantName ?? 'Restaurant TBD'}</p>

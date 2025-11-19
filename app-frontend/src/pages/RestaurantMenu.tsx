@@ -6,13 +6,30 @@ import { Card, CardContent } from '../components/ui/card';
 import { getRestaurantById, getMenuItems } from '../services/api';
 import { MenuItem } from '../lib/mockData';
 import { useApp } from '../contexts/AppContext';
+import { rateRestaurant } from '../services/api';
 import { toast } from 'sonner';
 import { ImageWithFallback } from '../components/figma/ImageWithFallback';
+
+const StarRating = ({ rating, onRate }) => {
+  return (
+    <div className="flex items-center">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <Star
+          key={star}
+          className={`h-5 w-5 cursor-pointer ${
+            star <= rating ? 'text-yellow-500' : 'text-gray-400'
+          }`}
+          fill={star <= rating ? 'currentColor' : 'none'}
+          onClick={() => onRate(star)}
+        />
+      ))}
+    </div>
+  );
+};
 
 export const RestaurantMenu: React.FC = () => {
   const { restaurantId } = useParams<{ restaurantId: string }>();
   const { addToCart } = useApp();
-  // We'll treat backend responses as `any` and map to the frontend MenuItem type
   const [restaurant, setRestaurant] = useState<any | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
 
@@ -26,8 +43,7 @@ export const RestaurantMenu: React.FC = () => {
         ]);
         const r: any = restaurantResponse.data;
         setRestaurant(r);
-        // Backend returns a Menu object { menuId, items: [...] } — normalize to an array
-  const rawItems: any[] = (menuResponse.data as any)?.items ?? (menuResponse.data as any) ?? [];
+        const rawItems: any[] = (menuResponse.data as any)?.items ?? (menuResponse.data as any) ?? [];
         const mapped: MenuItem[] = (rawItems || []).map((mi: any) => ({
           id: String(mi.menuItemId ?? mi.id),
           restaurantId: String(r.restaurantId ?? r.id),
@@ -43,6 +59,19 @@ export const RestaurantMenu: React.FC = () => {
     };
     fetchRestaurantDetails();
   }, [restaurantId]);
+
+  const handleRateRestaurant = async (rating: number) => {
+    if (!restaurantId) return;
+    try {
+      const response = await rateRestaurant(restaurantId, rating);
+      setRestaurant(response.data);
+      toast.success('Thank you for your rating!');
+    } catch (error) {
+      toast.error('Failed to submit rating.');
+      console.error('Failed to submit rating:', error);
+    }
+  };
+
   if (!restaurant) {
     return (
       <div className="min-h-screen bg-gray-50 pt-20 flex items-center justify-center">
@@ -64,7 +93,6 @@ export const RestaurantMenu: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-20 pb-12">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Back Button */}
         <Button
           variant="ghost"
           className="mb-6"
@@ -76,7 +104,6 @@ export const RestaurantMenu: React.FC = () => {
           </Link>
         </Button>
 
-        {/* Restaurant Header */}
         <div className="bg-white rounded-lg shadow-sm p-6 mb-8 flex items-center">
           <div className="w-1/3 mr-6">
             <ImageWithFallback src={restaurant.imageUrl} alt={restaurant.name} className="w-full h-auto rounded-lg" />
@@ -84,10 +111,15 @@ export const RestaurantMenu: React.FC = () => {
           <div>
             <h1 className="text-gray-900 mb-2">{restaurant.name}</h1>
             <p className="text-gray-600 mb-4">{restaurant.cuisineType}</p>
+            <div className="flex items-center">
+              <StarRating rating={restaurant.rating} onRate={handleRateRestaurant} />
+              <span className="ml-2 text-sm text-gray-600">
+                ({typeof restaurant.rating === 'number' ? restaurant.rating.toFixed(1) : 'No rating'})
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Menu Items */}
         <div className="space-y-6">
           <h2 className="text-gray-900">Menu</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

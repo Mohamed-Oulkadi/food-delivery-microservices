@@ -15,7 +15,7 @@ public class OrderServiceApplication {
 	@Bean
 	public WebClient webClient() {
 		return WebClient.builder()
-				.baseUrl("http://delivery-service:8082") // Assuming delivery-service is the hostname in Docker network
+				.baseUrl("http://backend-delivery:8083") // Assuming delivery-service is the hostname in Docker network
 				.build();
 	}
 }

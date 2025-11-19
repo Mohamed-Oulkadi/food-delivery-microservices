@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Restaurant, MenuItem, UserDto, Menu, Order } from '../lib/mockData';
+import imageCompression from 'browser-image-compression';
 import { 
   getRestaurants, 
   getMenuItems, 
@@ -9,9 +10,15 @@ import {
   updateUser, 
   deleteUser,
   getOrders,
-  getOrderStats
+  getOrderStats,
+  deleteRestaurant,
+  createRestaurant,
+  updateRestaurant
 } from '../services/api';
 import { toast } from 'sonner';
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024; // 5MB
+const VALID_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 interface AdminContextType {
   isLoading: boolean;
@@ -39,8 +46,8 @@ interface AdminContextType {
   setEditingUser: React.Dispatch<React.SetStateAction<UserDto | null>>;
   selectedRestaurantId: string;
   setSelectedRestaurantId: React.Dispatch<React.SetStateAction<string>>;
-  restaurantForm: { name: string; cuisineType: string; address: string };
-  setRestaurantForm: React.Dispatch<React.SetStateAction<{ name: string; cuisineType: string; address: string }>>;
+  restaurantForm: { name: string; cuisineType: string; address: string; };
+  setRestaurantForm: React.Dispatch<React.SetStateAction<{ name: string; cuisineType: string; address: string; }>>;
   selectedFile: File | null;
   setSelectedFile: React.Dispatch<React.SetStateAction<File | null>>;
   selectedMenuItemFile: File | null;
@@ -62,6 +69,7 @@ interface AdminContextType {
   handleDeleteUser: (id: number) => Promise<void>;
   currentRestaurantMenuItems: MenuItem[];
   currentRestaurant: Restaurant | undefined;
+  handleFileSelect: (event: React.ChangeEvent<HTMLInputElement>, fileType: 'restaurant' | 'menuItem') => void;
 }
 
 interface OrderStats {
@@ -129,7 +137,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const [restaurantForm, setRestaurantForm] = useState({
     name: '',
     cuisineType: '',
-    address: ''
+    address: '',
   });
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [selectedMenuItemFile, setSelectedMenuItemFile] = useState<File | null>(null);
@@ -248,7 +256,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     setRestaurantForm({
       name: restaurant.name,
       cuisineType: restaurant.cuisineType,
-      address: restaurant.address
+      address: restaurant.address,
     });
     setSelectedFile(null);
     setIsRestaurantDialogOpen(true);
@@ -262,51 +270,76 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
 
     try {
       if (editingRestaurant) {
-        const updatedRestaurant = { ...editingRestaurant, ...restaurantForm };
+        // Update existing restaurant
+        const updatedRestaurantData = { ...restaurantForm };
+        const response = await updateRestaurant(editingRestaurant.restaurantId, updatedRestaurantData);
+        let finalRestaurant = response.data;
+
         if (selectedFile) {
-          const imageUrl = await uploadRestaurantImage(editingRestaurant.restaurantId, selectedFile);
-          updatedRestaurant.imageUrl = imageUrl.data;
+          try {
+            const imageUrlResponse = await uploadRestaurantImage(editingRestaurant.restaurantId, selectedFile);
+            finalRestaurant = { ...finalRestaurant, imageUrl: imageUrlResponse.data };
+          } catch (error) {
+            toast.error('Failed to upload image. Restaurant data was updated.');
+            console.error('Failed to upload image:', error);
+          }
         }
+
         setRestaurants(prev =>
-          prev.map(r => r.restaurantId === editingRestaurant.restaurantId
-            ? updatedRestaurant
+          prev.map(r => r.restaurantId === finalRestaurant.restaurantId
+            ? finalRestaurant
             : r
           )
         );
         toast.success('Restaurant updated successfully');
       } else {
-        const newRestaurantWithId: Restaurant = {
-          restaurantId: `${Date.now()}`,
+        // Create new restaurant
+        const newRestaurantData = {
           ...restaurantForm,
-          imageUrl: '',
-          rating: 4.5,
-          deliveryTime: '30-40 min'
         };
+        const response = await createRestaurant(newRestaurantData);
+        let finalRestaurant = response.data;
 
         if (selectedFile) {
           try {
-            const imageUrl = await uploadRestaurantImage(newRestaurantWithId.restaurantId, selectedFile);
-            newRestaurantWithId.imageUrl = imageUrl.data;
+            const imageUrlResponse = await uploadRestaurantImage(finalRestaurant.restaurantId, selectedFile);
+            finalRestaurant = { ...finalRestaurant, imageUrl: imageUrlResponse.data };
           } catch (error) {
-            toast.error('Failed to upload image. Restaurant created without an image.');
+            toast.error('Failed to upload image for new restaurant.');
+            console.error('Failed to upload image for new restaurant:', error);
           }
         }
 
-        setRestaurants(prev => [...prev, newRestaurantWithId]);
+        setRestaurants(prev => [...prev, finalRestaurant]);
         toast.success('Restaurant added successfully');
       }
 
       setIsRestaurantDialogOpen(false);
+      setEditingRestaurant(null); // Clear editing state after save
+      setRestaurantForm({ name: '', cuisineType: '', address: '' }); // Clear form
+      setSelectedFile(null); // Clear selected file
     } catch (error) {
       toast.error('Failed to save restaurant');
+      console.error('Failed to save restaurant:', error);
     }
   };
 
-  const handleDeleteRestaurant = (id: string) => {
+  const handleDeleteRestaurant = async (id: string) => {
     if (window.confirm('Are you sure you want to delete this restaurant?')) {
-      setRestaurants(prev => prev.filter(r => r.restaurantId !== id));
-      setMenuItems(prev => prev.filter(m => m.restaurantId !== id));
-      toast.success('Restaurant deleted successfully');
+      try {
+        // Optimistically update the UI
+        setRestaurants(prev => prev.filter(r => r.restaurantId !== id));
+        setMenuItems(prev => prev.filter(m => m.restaurantId !== id));
+        toast.success('Restaurant deleted successfully');
+
+        // Call the API to delete the restaurant
+        await deleteRestaurant(id);
+      } catch (error) {
+        toast.error('Failed to delete restaurant');
+        console.error('Failed to delete restaurant:', error);
+        // Revert UI changes if API call fails (optional, depending on desired UX)
+        // You might want to refetch data or add the restaurant back if the delete failed
+      }
     }
   };
 
@@ -425,6 +458,43 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
   const currentRestaurantMenuItems = menuItems.filter(m => m.restaurantId === selectedRestaurantId);
   const currentRestaurant = restaurants.find(r => r.restaurantId === selectedRestaurantId);
 
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>, fileType: 'restaurant' | 'menuItem') => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!VALID_IMAGE_TYPES.includes(file.type)) {
+      toast.error('Invalid file type. Please select a JPG, PNG, GIF, or WEBP image.');
+      return;
+    }
+
+    if (file.size > MAX_IMAGE_SIZE) {
+      toast.info('Image is too large, attempting to compress...');
+      try {
+        const options = {
+          maxSizeMB: 1,
+          maxWidthOrHeight: 1920,
+          useWebWorker: true,
+        };
+        const compressedFile = await imageCompression(file, options);
+        if (fileType === 'restaurant') {
+          setSelectedFile(compressedFile);
+        } else {
+          setSelectedMenuItemFile(compressedFile);
+        }
+        toast.success('Image compressed and selected.');
+      } catch (error) {
+        toast.error('Failed to compress image. Please select a smaller file.');
+        console.error('Image compression error:', error);
+      }
+    } else {
+      if (fileType === 'restaurant') {
+        setSelectedFile(file);
+      } else {
+        setSelectedMenuItemFile(file);
+      }
+    }
+  };
+
   const value = {
     isLoading,
     restaurants,
@@ -474,6 +544,7 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
     handleDeleteUser,
     currentRestaurantMenuItems,
     currentRestaurant,
+    handleFileSelect,
   };
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;

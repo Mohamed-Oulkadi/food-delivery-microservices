@@ -35,6 +35,7 @@ public class DataInitializer implements CommandLineRunner {
             italianPlace.setImageUrl("/images/amici-italian.svg");
             italianPlace.setRating(4.5);
             italianPlace.setDeliveryTime("30-40 min");
+            italianPlace.setAddress("123 Main St, Anytown, CA 90210");
 
             Menu italianMenu = new Menu();
             italianMenu.setItems(new ArrayList<>(List.of(
@@ -51,6 +52,7 @@ public class DataInitializer implements CommandLineRunner {
             burgerJoint.setImageUrl("/images/burger-barn.svg");
             burgerJoint.setRating(4.3);
             burgerJoint.setDeliveryTime("20-30 min");
+            burgerJoint.setAddress("456 Oak Ave, Anytown, CA 90210");
 
             Menu burgerMenu = new Menu();
             burgerMenu.setItems(new ArrayList<>(List.of(
@@ -67,6 +69,7 @@ public class DataInitializer implements CommandLineRunner {
             mexicanPlace.setImageUrl("/images/taco-fiesta.svg");
             mexicanPlace.setRating(4.6);
             mexicanPlace.setDeliveryTime("25-35 min");
+            mexicanPlace.setAddress("789 Pine Ln, Anytown, CA 90210");
 
             Menu mexicanMenu = new Menu();
             mexicanMenu.setItems(new ArrayList<>(List.of(
@@ -83,6 +86,7 @@ public class DataInitializer implements CommandLineRunner {
             sushiPlace.setImageUrl("/images/sushi-express.svg");
             sushiPlace.setRating(4.8);
             sushiPlace.setDeliveryTime("35-45 min");
+            sushiPlace.setAddress("101 Cedar Blvd, Anytown, CA 90210");
 
             Menu sushiMenu = new Menu();
             sushiMenu.setItems(new ArrayList<>(List.of(

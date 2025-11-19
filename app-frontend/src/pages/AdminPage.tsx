@@ -55,6 +55,7 @@ export const AdminPage: React.FC = () => {
     currentRestaurantMenuItems,
     handleEditMenuItem,
     handleDeleteMenuItem,
+    handleFileSelect,
   } = useAdmin();
 
   const navigationItems = [
@@ -181,7 +182,7 @@ export const AdminPage: React.FC = () => {
                 id="image"
                 type="file"
                 accept="image/*"
-                onChange={(e) => setSelectedFile(e.target.files ? e.target.files[0] : null)}
+                onChange={(e) => handleFileSelect(e, 'restaurant')}
               />
               {selectedFile && (
                 <p className="text-xs text-slate-500">Selected: {selectedFile.name}</p>
@@ -297,7 +298,7 @@ export const AdminPage: React.FC = () => {
                     id="menuItemImage"
                     type="file"
                     accept="image/*"
-                    onChange={(e) => setSelectedMenuItemFile(e.target.files ? e.target.files[0] : null)}
+                    onChange={(e) => handleFileSelect(e, 'menuItem')}
                   />
                   {selectedMenuItemFile && (
                     <p className="text-xs text-slate-500">Selected: {selectedMenuItemFile.name}</p>
@@ -345,21 +346,22 @@ export const AdminPage: React.FC = () => {
                         <p className="text-sm text-green-600 font-semibold mt-1">${item.price.toFixed(2)}</p>
                       </div>
                       <div className="flex gap-2 ml-4">
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleEditMenuItem(item)}
-                          className="hover:bg-blue-50"
-                        >
-                        </Button>
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => handleDeleteMenuItem(item.id)}
-                          className="hover:bg-red-50"
-                        >
-                        </Button>
-                      </div>
+                                                  <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => handleEditMenuItem(item)}
+                                                    className="hover:bg-blue-50"
+                                                  >
+                                                    <Pencil className="h-4 w-4" />
+                                                  </Button>
+                                                  <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    onClick={() => handleDeleteMenuItem(item.id)}
+                                                    className="hover:bg-red-50"
+                                                  >
+                                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                                  </Button>                      </div>
                     </div>
                   ))}
                 </div>
