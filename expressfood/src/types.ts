@@ -28,6 +28,9 @@ export interface User {
     name: string;
     username: string;
     role?: string;
+    phoneNumber?: string;
+    address?: string;
+    active?: boolean;
 }
 
 export interface Order {

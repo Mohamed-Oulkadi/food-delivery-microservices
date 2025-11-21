@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, MapPin } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -14,6 +14,13 @@ export const Checkout: React.FC = () => {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [address, setAddress] = useState('123 Main St, New York, NY'); // Mock address
+
+    // Redirect to login if user is not authenticated
+    useEffect(() => {
+        if (!user) {
+            navigate('/login');
+        }
+    }, [user, navigate]);
 
     const handlePlaceOrder = async () => {
         if (items.length === 0) return;

@@ -64,7 +64,7 @@ const OrderTracking: React.FC = () => {
     // Only show steps up to IN_TRANSIT if order hasn't been picked up yet
     // Show all steps only when status is IN_TRANSIT or DELIVERED
     const getVisibleSteps = () => {
-        if (status === 'PENDING' || status === 'PREPARING') {
+        if (status === 'PENDING' || status === 'PREPARING' || status === 'CONFIRMED') {
             // Only show Order Placed and Preparing
             return steps.filter(s => s.id === 'PENDING' || s.id === 'PREPARING');
         }
@@ -73,6 +73,11 @@ const OrderTracking: React.FC = () => {
     };
 
     const visibleSteps = getVisibleSteps();
+
+    // Debug: Log the current status to help troubleshoot
+    console.log('Order Tracking - Current Status:', status);
+    console.log('Order Tracking - Current Step Index:', currentStepIndex);
+    console.log('Order Tracking - Visible Steps:', visibleSteps.map(s => s.id));
 
     const confirmDelivery = async () => {
         if (!delivery) return;
@@ -124,7 +129,21 @@ const OrderTracking: React.FC = () => {
 
                         {visibleSteps.map((step, index) => {
                             const Icon = step.icon;
-                            const isActive = index <= currentStepIndex;
+                            // Make both PENDING and PREPARING active when order is in initial states
+                            // This gives better visual feedback that the order is being prepared
+                            let isActive = false;
+
+                            if (step.id === 'PENDING') {
+                                // PENDING icon is always active (green)
+                                isActive = true;
+                            } else if (step.id === 'PREPARING') {
+                                // PREPARING icon is green for all initial states and when actually preparing
+                                // Include: PENDING, PLACED, CONFIRMED, ACCEPTED, PREPARING
+                                isActive = ['PENDING', 'PLACED', 'CONFIRMED', 'ACCEPTED', 'PREPARING'].includes(status) || index <= currentStepIndex;
+                            } else {
+                                // Other steps use normal progression logic
+                                isActive = index <= currentStepIndex;
+                            }
 
                             return (
                                 <div key={step.id} className="flex flex-col items-center bg-white px-2">
