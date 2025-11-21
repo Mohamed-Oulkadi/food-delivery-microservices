@@ -56,6 +56,18 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderStats());
     }
 
+    @GetMapping("/admin/stats")
+    public ResponseEntity<com.example.orderservice.dtos.AdminStatsDto> getAdminStats() {
+        return ResponseEntity.ok(orderService.getAdminStats());
+    }
+
+    @PutMapping("/{orderId}/status")
+    public ResponseEntity<OrderDto> updateOrderStatus(@PathVariable Long orderId, @RequestBody java.util.Map<String, String> statusUpdate) {
+        String status = statusUpdate.get("status");
+        Order updatedOrder = orderService.updateOrderStatus(orderId, status);
+        return ResponseEntity.ok(toDto(updatedOrder));
+    }
+
     private OrderDto toDto(Order order) {
         OrderDto dto = new OrderDto();
         dto.setId(order.getOrderId());

@@ -19,12 +19,20 @@ public class DeliveryService {
 
     @Transactional
     public Delivery createDelivery(DeliveryRequestDto request) {
+        // Check if driver already has an active delivery
+        if (request.getDriverId() != null) {
+            java.util.List<Delivery> activeDeliveries = getActiveDeliveriesForDriver(request.getDriverId());
+            if (!activeDeliveries.isEmpty()) {
+                throw new IllegalStateException("Driver already has an active delivery");
+            }
+        }
+
         Delivery delivery = new Delivery();
         delivery.setOrderId(request.getOrderId());
         delivery.setDriverId(request.getDriverId()); // Can be null
         delivery.setCustomerAddress(request.getCustomerAddress());
         delivery.setRestaurantName(request.getRestaurantName());
-        delivery.setStatus(DeliveryStatus.PENDING);
+        delivery.setStatus(DeliveryStatus.ACCEPTED); // Driver creates it when accepting
         delivery.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(30)); // Simple estimate
 
         return deliveryRepository.save(delivery);
@@ -62,7 +70,11 @@ public class DeliveryService {
         if (driverId == null) {
             return java.util.List.of();
         }
-        return deliveryRepository.findByDriverIdAndStatusNot(driverId, DeliveryStatus.DELIVERED);
+        // Exclude COMPLETED and CANCELLED (Driver is blocked until COMPLETED)
+        return deliveryRepository.findByDriverIdAndStatusNot(driverId, DeliveryStatus.COMPLETED)
+                .stream()
+                .filter(d -> d.getStatus() != DeliveryStatus.CANCELLED)
+                .collect(java.util.stream.Collectors.toList());
     }
 
     @Transactional
@@ -70,6 +82,13 @@ public class DeliveryService {
         if (driverId == null) {
             throw new IllegalArgumentException("Driver ID is required to accept a delivery");
         }
+
+        // Check if driver already has an active delivery
+        java.util.List<Delivery> activeDeliveries = getActiveDeliveriesForDriver(driverId);
+        if (!activeDeliveries.isEmpty()) {
+            throw new IllegalStateException("Driver already has an active delivery");
+        }
+
         Delivery delivery = getDeliveryById(deliveryId);
         if (delivery.getDriverId() != null && !delivery.getDriverId().equals(driverId)) {
             throw new IllegalStateException("Delivery already assigned to another driver");
@@ -84,5 +103,9 @@ public class DeliveryService {
 
     public java.util.List<Delivery> getAllDeliveries() {
         return deliveryRepository.findAll();
+    }
+
+    public java.util.List<Delivery> getDeliveriesForDriver(Long driverId) {
+        return deliveryRepository.findByDriverId(driverId);
     }
 }

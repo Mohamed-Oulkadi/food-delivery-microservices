@@ -151,30 +151,6 @@ services:
       - expressfood-network
     restart: on-failure
 
-  # 3. Frontend
-  expressfood-app:
-    build:
-      context: ./app-frontend # Make sure this folder name matches your React app
-      dockerfile: Dockerfile
-    container_name: expressfood-app
-    ports:
-      - "3000:80"
-    restart: unless-stopped
-    environment:
-      - NODE_ENV=production
-    networks:
-      - expressfood-network
-    depends_on:
-      - backend-restaurant
-      - backend-order
-      - backend-delivery
-      - backend-user
-    healthcheck:
-      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-
 # Define all volumes
 volumes:
   postgres_restaurant_data:

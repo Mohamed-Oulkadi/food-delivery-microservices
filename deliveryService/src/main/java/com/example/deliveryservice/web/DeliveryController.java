@@ -54,6 +54,11 @@ public class DeliveryController {
         return ResponseEntity.ok(deliveryService.getActiveDeliveriesForDriver(driverId));
     }
 
+    @GetMapping("/driver/{driverId}")
+    public ResponseEntity<java.util.List<Delivery>> getDeliveriesForDriver(@PathVariable Long driverId) {
+        return ResponseEntity.ok(deliveryService.getDeliveriesForDriver(driverId));
+    }
+
     @PutMapping("/{id}/assign")
     public ResponseEntity<Delivery> assignDelivery(@PathVariable Long id, @RequestBody AssignDeliveryDto assignRequest) {
         return ResponseEntity.ok(deliveryService.assignDelivery(id, assignRequest.getDriverId()));

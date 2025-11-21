@@ -23,7 +23,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/restaurants")
 @AllArgsConstructor
-@CrossOrigin(origins = "*")
 public class RestaurantController {
 
     private final RestaurantService restaurantService;

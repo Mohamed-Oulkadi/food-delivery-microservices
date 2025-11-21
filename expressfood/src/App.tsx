@@ -1,0 +1,54 @@
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import { CartProvider } from './context/CartContext';
+import { Navbar } from './components/Navbar';
+import { CartDrawer } from './components/CartDrawer';
+import { Home } from './pages/Home';
+import { RestaurantDetails } from './pages/RestaurantDetails';
+import { Checkout } from './pages/Checkout';
+import OrderTracking from './pages/OrderTracking';
+import Login from './pages/auth/Login';
+import Register from './pages/auth/Register';
+import MyOrders from './pages/MyOrders';
+import DriverDashboard from './pages/DriverDashboard';
+import DriverProfile from './pages/DriverProfile';
+import AdminDashboard from './pages/AdminDashboard';
+import RestaurantManagement from './pages/RestaurantManagement';
+import CustomerManagement from './pages/CustomerManagement';
+import DriverManagement from './pages/DriverManagement';
+import { AdminLayout } from './components/AdminLayout';
+
+function App() {
+  return (
+    <AuthProvider>
+      <CartProvider>
+        <Router>
+          <div className="min-h-screen bg-slate-50 font-sans text-slate-900">
+            <Navbar />
+            <CartDrawer />
+            <main>
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/restaurant/:id" element={<RestaurantDetails />} />
+                <Route path="/checkout" element={<Checkout />} />
+                <Route path="/track/:id" element={<OrderTracking />} />
+                <Route path="/my-orders" element={<MyOrders />} />
+                <Route path="/driver/dashboard" element={<DriverDashboard />} />
+                <Route path="/profile" element={<DriverProfile />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/register" element={<Register />} />
+                {/* Admin Routes */}
+                <Route path="/admin" element={<AdminLayout><AdminDashboard /></AdminLayout>} />
+                <Route path="/admin/restaurants" element={<AdminLayout><RestaurantManagement /></AdminLayout>} />
+                <Route path="/admin/customers" element={<AdminLayout><CustomerManagement /></AdminLayout>} />
+                <Route path="/admin/drivers" element={<AdminLayout><DriverManagement /></AdminLayout>} />
+              </Routes>
+            </main>
+          </div>
+        </Router>
+      </CartProvider>
+    </AuthProvider>
+  );
+}
+
+export default App;

@@ -36,6 +36,9 @@ public class UserService {
         // HASH the password before saving
         user.setPassword(passwordEncoder.encode(request.getPassword()));
         user.setRole(request.getRole() != null ? request.getRole() : "ROLE_CUSTOMER");
+        user.setPhoneNumber(request.getPhoneNumber());
+        user.setAddress(request.getAddress());
+        user.setActive(true); // New users are active by default
 
         User savedUser = userRepository.save(user);
         return mapToUserDto(savedUser);
@@ -66,6 +69,9 @@ public class UserService {
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setRole(userDto.getRole());
+        if (userDto.getPhoneNumber() != null) user.setPhoneNumber(userDto.getPhoneNumber());
+        if (userDto.getAddress() != null) user.setAddress(userDto.getAddress());
+        if (userDto.getActive() != null) user.setActive(userDto.getActive());
 
         User updatedUser = userRepository.save(user);
         return mapToUserDto(updatedUser);
@@ -85,6 +91,11 @@ public class UserService {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setRole(user.getRole());
+        dto.setPhoneNumber(user.getPhoneNumber());
+        dto.setAddress(user.getAddress());
+        dto.setActive(user.getActive());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
     }
 

@@ -42,7 +42,7 @@ public class OrderService {
         } catch (NumberFormatException ex) {
             // ignore
         }
-        order.setStatus(OrderStatus.PLACED);
+        order.setStatus(OrderStatus.PREPARING);
 
         List<OrderItem> orderItems = new ArrayList<>();
         double totalAmount = 0.0;
@@ -97,6 +97,13 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Order not found"));
     }
 
+    @Transactional
+    public Order updateOrderStatus(Long orderId, String status) {
+        Order order = getOrderById(orderId);
+        order.setStatus(OrderStatus.valueOf(status));
+        return orderRepository.save(order);
+    }
+
     // Return all orders (useful for quick testing / admin views)
     public List<Order> getAllOrders() {
         return orderRepository.findAll();
@@ -123,5 +130,54 @@ public class OrderService {
                 .count();
 
         return new OrderStatsDto(totalOrders, pendingOrders, deliveredOrders);
+    }
+
+    public com.example.orderservice.dtos.AdminStatsDto getAdminStats() {
+        List<Order> allOrders = orderRepository.findAll();
+        
+        com.example.orderservice.dtos.AdminStatsDto stats = new com.example.orderservice.dtos.AdminStatsDto();
+        
+        // Total orders
+        stats.setTotalOrders(allOrders.size());
+        
+        // Orders by status
+        stats.setOrdersPreparing(allOrders.stream()
+                .filter(o -> OrderStatus.PREPARING.equals(o.getStatus()))
+                .count());
+        
+        stats.setOrdersOutForDelivery(allOrders.stream()
+                .filter(o -> OrderStatus.DELIVERING.equals(o.getStatus()) || 
+                            OrderStatus.READY_FOR_PICKUP.equals(o.getStatus()))
+                .count());
+        
+        stats.setOrdersDelivered(allOrders.stream()
+                .filter(o -> OrderStatus.DELIVERED.equals(o.getStatus()))
+                .count());
+        
+        stats.setOrdersCompleted(allOrders.stream()
+                .filter(o -> OrderStatus.COMPLETED.equals(o.getStatus()))
+                .count());
+        
+        stats.setOrdersCancelled(allOrders.stream()
+                .filter(o -> OrderStatus.CANCELLED.equals(o.getStatus()))
+                .count());
+        
+        // Today's orders (simple version - counts all orders for now)
+        stats.setTodayOrders(allOrders.size());
+        stats.setTodayRevenue(allOrders.stream()
+                .mapToDouble(Order::getTotalAmount)
+                .sum());
+        
+        // Week's orders
+        stats.setWeekOrders(allOrders.size());
+        stats.setWeekRevenue(stats.getTodayRevenue());
+        
+        // Note: Customer, Driver, Restaurant counts need to be fetched from other services
+        // For now, set to 0 - frontend can call those services separately
+        stats.setTotalCustomers(0);
+        stats.setTotalDrivers(0);
+        stats.setTotalRestaurants(0);
+        
+        return stats;
     }
 }

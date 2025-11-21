@@ -27,8 +27,10 @@ public class RestaurantService {
         restaurant.setName(restaurantDto.getName());
         restaurant.setCuisineType(restaurantDto.getCuisineType());
         restaurant.setImageUrl(restaurantDto.getImageUrl());
-    restaurant.setRating(restaurantDto.getRating());
-    restaurant.setDeliveryTime(restaurantDto.getDeliveryTime());
+        restaurant.setRating(restaurantDto.getRating());
+        restaurant.setDeliveryTime(restaurantDto.getDeliveryTime());
+        restaurant.setAddress(restaurantDto.getAddress());
+        restaurant.setPhoneNumber(restaurantDto.getPhoneNumber());
 
         Menu menu = new Menu();
         menu.setItems(new ArrayList<>());
@@ -74,6 +76,7 @@ public class RestaurantService {
         existingRestaurant.setRating(restaurantDto.getRating());
         existingRestaurant.setDeliveryTime(restaurantDto.getDeliveryTime());
         existingRestaurant.setAddress(restaurantDto.getAddress());
+        existingRestaurant.setPhoneNumber(restaurantDto.getPhoneNumber());
         return restaurantRepository.save(existingRestaurant);
     }
 

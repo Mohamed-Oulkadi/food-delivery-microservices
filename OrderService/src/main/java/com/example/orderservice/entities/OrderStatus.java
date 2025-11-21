@@ -1,5 +1,7 @@
 package com.example.orderservice.entities;
 
+
+
 public enum OrderStatus {
     PLACED,
     ACCEPTED,
@@ -7,5 +9,6 @@ public enum OrderStatus {
     READY_FOR_PICKUP,
     DELIVERING,
     DELIVERED,
+    COMPLETED,
     CANCELLED
 }
