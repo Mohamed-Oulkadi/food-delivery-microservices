@@ -11,7 +11,6 @@ import { Badge } from '../components/ui/Badge';
 const DriverProfile: React.FC = () => {
     const navigate = useNavigate();
     const { user, updateUser } = useAuth();
-    const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -103,8 +102,8 @@ const DriverProfile: React.FC = () => {
             {/* Success/Error Message */}
             {message && (
                 <div className={`mb-6 rounded-lg p-4 flex items-start gap-3 ${message.type === 'success'
-                        ? 'bg-emerald-50 border border-emerald-200'
-                        : 'bg-red-50 border border-red-200'
+                    ? 'bg-emerald-50 border border-emerald-200'
+                    : 'bg-red-50 border border-red-200'
                     }`}>
                     {message.type === 'success' ? (
                         <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 flex-shrink-0" />

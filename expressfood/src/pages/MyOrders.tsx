@@ -69,7 +69,7 @@ const MyOrders: React.FC = () => {
             const response = await orderService.put(`/api/orders/${orderId}/status`, { status: 'COMPLETED' });
             console.log('Order status update response:', response);
 
-            // 2. Also try to update Delivery Service if possible, but Order Service is primary here for user record
+            // 2. Also try to update Delivery Service if possible, but Order Service is emerald here for user record
             // Ideally Order Service should sync this, but for now we update Order status.
 
             // Refresh orders

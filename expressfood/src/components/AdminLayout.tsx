@@ -1,4 +1,4 @@
-import React, { ReactNode } from 'react';
+import React, { type ReactNode } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, Store, Users, Truck, LogOut, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';

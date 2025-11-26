@@ -64,7 +64,6 @@ export const Checkout: React.FC = () => {
             console.error('Failed to place order:', err);
             // For demo purposes, simulate success even if backend fails
             setTimeout(() => {
-                const mockOrderId = 'mock-order-' + Date.now();
                 clearCart();
                 navigate('/my-orders');
             }, 1000);

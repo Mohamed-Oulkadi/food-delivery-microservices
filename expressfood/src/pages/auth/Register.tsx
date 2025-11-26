@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { userService } from '../../api/axios';
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
-import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Card';
+import { AuthLayout } from '../../components/auth/AuthLayout';
+import { User, Mail, Lock, ArrowRight, Loader2, Store } from 'lucide-react';
 
 const Register: React.FC = () => {
     const navigate = useNavigate();
@@ -11,7 +12,7 @@ const Register: React.FC = () => {
         username: '',
         email: '',
         password: '',
-        role: 'CUSTOMER', // Default role
+        role: 'CUSTOMER',
         restaurantId: undefined as number | undefined
     });
     const [error, setError] = useState('');
@@ -41,32 +42,39 @@ const Register: React.FC = () => {
     };
 
     return (
-        <div className="container mx-auto px-4 py-20 max-w-md">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-2xl text-center">Create Account</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={handleSubmit} className="space-y-4">
-                        {error && (
-                            <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm">
-                                {error}
-                            </div>
-                        )}
+        <AuthLayout
+            title="Join the Feast"
+            subtitle="Create your account to start ordering delicious food."
+            imageSrc="https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=1974&auto=format&fit=crop"
+        >
+            <form onSubmit={handleSubmit} className="space-y-6">
+                {error && (
+                    <div className="bg-red-50 border border-red-100 text-red-600 p-4 rounded-xl text-sm flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-red-600" />
+                        {error}
+                    </div>
+                )}
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Username</label>
+                <div className="space-y-4">
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700 ml-1">Username</label>
+                        <div className="relative group">
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
                             <Input
                                 name="username"
                                 value={formData.username}
                                 onChange={handleChange}
                                 required
                                 placeholder="Choose a username"
+                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
                             />
                         </div>
+                    </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Email</label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700 ml-1">Email Address</label>
+                        <div className="relative group">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
                             <Input
                                 type="email"
                                 name="email"
@@ -74,11 +82,15 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Enter your email"
+                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
                             />
                         </div>
+                    </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Password</label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700 ml-1">Password</label>
+                        <div className="relative group">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
                             <Input
                                 type="password"
                                 name="password"
@@ -86,27 +98,38 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Create a password"
+                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
                             />
                         </div>
+                    </div>
 
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">I am a...</label>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium text-slate-700 ml-1">I am a...</label>
+                        <div className="relative">
                             <select
                                 name="role"
                                 value={formData.role}
                                 onChange={handleChange}
-                                className="w-full h-10 px-3 rounded-md border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:border-[#FF6B00] focus:ring-4 focus:ring-[#FF6B00]/20 transition-all appearance-none cursor-pointer"
                             >
-                                <option value="CUSTOMER">Customer</option>
-                                <option value="DRIVER">Driver</option>
-                                <option value="ROLE_RESTAURANT_OWNER">Restaurant Owner</option>
+                                <option value="CUSTOMER">Customer (I want to order food)</option>
+                                <option value="DRIVER">Driver (I want to deliver)</option>
+                                <option value="ROLE_RESTAURANT_OWNER">Restaurant Owner (I have a restaurant)</option>
                                 <option value="ADMIN">Admin</option>
                             </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <svg className="h-4 w-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </div>
                         </div>
+                    </div>
 
-                        {formData.role === 'ROLE_RESTAURANT_OWNER' && (
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium">Restaurant ID</label>
+                    {formData.role === 'ROLE_RESTAURANT_OWNER' && (
+                        <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
+                            <label className="text-sm font-medium text-slate-700 ml-1">Restaurant ID</label>
+                            <div className="relative group">
+                                <Store className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
                                 <Input
                                     type="number"
                                     name="restaurantId"
@@ -117,25 +140,42 @@ const Register: React.FC = () => {
                                     }))}
                                     required
                                     placeholder="Enter your restaurant ID"
+                                    className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
                                 />
-                                <p className="text-xs text-slate-500">Contact admin to get your restaurant ID</p>
                             </div>
-                        )}
-
-                        <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={loading}>
-                            {loading ? 'Creating Account...' : 'Sign Up'}
-                        </Button>
-
-                        <div className="text-center text-sm text-slate-500 mt-4">
-                            Already have an account?{' '}
-                            <Link to="/login" className="text-emerald-600 hover:underline font-medium">
-                                Sign in
-                            </Link>
+                            <p className="text-xs text-slate-500 ml-1">Contact admin to get your restaurant ID</p>
                         </div>
-                    </form>
-                </CardContent>
-            </Card>
-        </div>
+                    )}
+                </div>
+
+                <Button
+                    type="submit"
+                    className="w-full h-12 bg-[#FF6B00] hover:bg-orange-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-orange-200 hover:shadow-orange-300 transition-all duration-300"
+                    disabled={loading}
+                >
+                    {loading ? (
+                        <div className="flex items-center gap-2">
+                            <Loader2 className="h-5 w-5 animate-spin" />
+                            Creating Account...
+                        </div>
+                    ) : (
+                        <div className="flex items-center gap-2">
+                            Sign Up
+                            <ArrowRight className="h-5 w-5" />
+                        </div>
+                    )}
+                </Button>
+
+                <div className="text-center mt-8">
+                    <p className="text-slate-500 text-sm">
+                        Already have an account?{' '}
+                        <Link to="/login" className="text-[#FF6B00] font-semibold hover:text-orange-700 hover:underline transition-all">
+                            Sign in
+                        </Link>
+                    </p>
+                </div>
+            </form>
+        </AuthLayout>
     );
 };
 

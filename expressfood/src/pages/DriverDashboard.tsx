@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Truck, CheckCircle, Clock, MapPin, User, History, Calendar, DollarSign } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, MapPin, History, Calendar } from 'lucide-react';
 import { orderService, deliveryService, restaurantService } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import type { Restaurant } from '../types';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
+import { Card, CardContent } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
 
