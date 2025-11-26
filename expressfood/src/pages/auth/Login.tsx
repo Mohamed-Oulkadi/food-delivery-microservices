@@ -83,14 +83,14 @@ const Login: React.FC = () => {
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700 ml-1">Username</label>
                         <div className="relative group">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
                             <Input
                                 name="username"
                                 value={formData.username}
                                 onChange={handleChange}
                                 required
                                 placeholder="Enter your username"
-                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
+                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all"
                             />
                         </div>
                     </div>
@@ -98,12 +98,12 @@ const Login: React.FC = () => {
                     <div className="space-y-2">
                         <div className="flex justify-between items-center ml-1">
                             <label className="text-sm font-medium text-slate-700">Password</label>
-                            <Link to="#" className="text-xs font-medium text-[#FF6B00] hover:text-orange-700 transition-colors">
+                            <Link to="#" className="text-xs font-medium text-emerald-600 hover:text-emerald-800 transition-colors">
                                 Forgot password?
                             </Link>
                         </div>
                         <div className="relative group">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
                             <Input
                                 type="password"
                                 name="password"
@@ -111,7 +111,7 @@ const Login: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Enter your password"
-                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
+                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all"
                             />
                         </div>
                     </div>
@@ -119,7 +119,7 @@ const Login: React.FC = () => {
 
                 <Button
                     type="submit"
-                    className="w-full h-12 bg-[#FF6B00] hover:bg-orange-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-orange-200 hover:shadow-orange-300 transition-all duration-300"
+                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-base shadow-lg shadow-emerald-200 hover:shadow-emerald-300 transition-all duration-300"
                     disabled={loading}
                 >
                     {loading ? (
@@ -140,7 +140,7 @@ const Login: React.FC = () => {
                 <div className="text-center mt-8">
                     <p className="text-slate-500 text-sm">
                         Don't have an account?{' '}
-                        <Link to="/register" className="text-[#FF6B00] font-semibold hover:text-orange-700 hover:underline transition-all">
+                        <Link to="/register" className="text-emerald-600 font-semibold hover:text-emerald-800 hover:underline transition-all">
                             Create an account
                         </Link>
                     </p>

@@ -23,7 +23,7 @@ export const AuthLayout: React.FC<AuthLayoutProps> = ({
                 <div className="max-w-md mx-auto w-full">
                     {/* Logo */}
                     <Link to="/" className="flex items-center gap-2 mb-12 group">
-                        <div className="h-10 w-10 rounded-xl bg-[#FF6B00] flex items-center justify-center shadow-lg shadow-orange-200 group-hover:scale-105 transition-transform duration-300">
+                        <div className="h-10 w-10 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-200 group-hover:scale-105 transition-transform duration-300">
                             <span className="text-white font-bold text-2xl">E</span>
                         </div>
                         <span className="text-2xl font-bold text-slate-900 tracking-tight">

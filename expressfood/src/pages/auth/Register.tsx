@@ -59,14 +59,14 @@ const Register: React.FC = () => {
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700 ml-1">Username</label>
                         <div className="relative group">
-                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
+                            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
                             <Input
                                 name="username"
                                 value={formData.username}
                                 onChange={handleChange}
                                 required
                                 placeholder="Choose a username"
-                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
+                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all"
                             />
                         </div>
                     </div>
@@ -74,7 +74,7 @@ const Register: React.FC = () => {
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700 ml-1">Email Address</label>
                         <div className="relative group">
-                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
                             <Input
                                 type="email"
                                 name="email"
@@ -82,7 +82,7 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Enter your email"
-                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
+                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all"
                             />
                         </div>
                     </div>
@@ -90,7 +90,7 @@ const Register: React.FC = () => {
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-700 ml-1">Password</label>
                         <div className="relative group">
-                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
                             <Input
                                 type="password"
                                 name="password"
@@ -98,7 +98,7 @@ const Register: React.FC = () => {
                                 onChange={handleChange}
                                 required
                                 placeholder="Create a password"
-                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
+                                className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all"
                             />
                         </div>
                     </div>
@@ -110,7 +110,7 @@ const Register: React.FC = () => {
                                 name="role"
                                 value={formData.role}
                                 onChange={handleChange}
-                                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:border-[#FF6B00] focus:ring-4 focus:ring-[#FF6B00]/20 transition-all appearance-none cursor-pointer"
+                                className="w-full h-12 px-4 rounded-xl border border-slate-200 bg-slate-50 text-slate-900 text-sm focus:outline-none focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/20 transition-all appearance-none cursor-pointer"
                             >
                                 <option value="CUSTOMER">Customer (I want to order food)</option>
                                 <option value="DRIVER">Driver (I want to deliver)</option>
@@ -129,7 +129,7 @@ const Register: React.FC = () => {
                         <div className="space-y-2 animate-in fade-in slide-in-from-top-2">
                             <label className="text-sm font-medium text-slate-700 ml-1">Restaurant ID</label>
                             <div className="relative group">
-                                <Store className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-[#FF6B00] transition-colors" />
+                                <Store className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400 group-focus-within:text-emerald-600 transition-colors" />
                                 <Input
                                     type="number"
                                     name="restaurantId"
@@ -140,7 +140,7 @@ const Register: React.FC = () => {
                                     }))}
                                     required
                                     placeholder="Enter your restaurant ID"
-                                    className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-[#FF6B00] focus:ring-[#FF6B00]/20 rounded-xl transition-all"
+                                    className="pl-10 h-12 bg-slate-50 border-slate-200 focus:border-emerald-600 focus:ring-emerald-600/20 rounded-xl transition-all"
                                 />
                             </div>
                             <p className="text-xs text-slate-500 ml-1">Contact admin to get your restaurant ID</p>
@@ -150,7 +150,7 @@ const Register: React.FC = () => {
 
                 <Button
                     type="submit"
-                    className="w-full h-12 bg-[#FF6B00] hover:bg-orange-600 text-white rounded-xl font-semibold text-base shadow-lg shadow-orange-200 hover:shadow-orange-300 transition-all duration-300"
+                    className="w-full h-12 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-semibold text-base shadow-lg shadow-emerald-200 hover:shadow-emerald-300 transition-all duration-300"
                     disabled={loading}
                 >
                     {loading ? (
@@ -169,7 +169,7 @@ const Register: React.FC = () => {
                 <div className="text-center mt-8">
                     <p className="text-slate-500 text-sm">
                         Already have an account?{' '}
-                        <Link to="/login" className="text-[#FF6B00] font-semibold hover:text-orange-700 hover:underline transition-all">
+                        <Link to="/login" className="text-emerald-600 font-semibold hover:text-emerald-800 hover:underline transition-all">
                             Sign in
                         </Link>
                     </p>
