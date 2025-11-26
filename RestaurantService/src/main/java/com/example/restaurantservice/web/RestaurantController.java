@@ -85,6 +85,29 @@ public class RestaurantController {
         return new ResponseEntity<>(newItem, HttpStatus.CREATED);
     }
 
+    // PUT /restaurants/{restaurantId}/menu/items/{menuItemId} - Update a menu item
+    @PutMapping("/{restaurantId}/menu/items/{menuItemId}")
+    public ResponseEntity<MenuItem> updateMenuItem(
+            @PathVariable String restaurantId,
+            @PathVariable String menuItemId,
+            @RequestBody MenuItemDto menuItemDto) {
+        Long restId = parseIdOrThrow(restaurantId, "restaurantId");
+        Long itemId = parseIdOrThrow(menuItemId, "menuItemId");
+        MenuItem updatedItem = restaurantService.updateMenuItem(restId, itemId, menuItemDto);
+        return ResponseEntity.ok(updatedItem);
+    }
+
+    // DELETE /restaurants/{restaurantId}/menu/items/{menuItemId} - Delete a menu item
+    @DeleteMapping("/{restaurantId}/menu/items/{menuItemId}")
+    public ResponseEntity<Void> deleteMenuItem(
+            @PathVariable String restaurantId,
+            @PathVariable String menuItemId) {
+        Long restId = parseIdOrThrow(restaurantId, "restaurantId");
+        Long itemId = parseIdOrThrow(menuItemId, "menuItemId");
+        restaurantService.deleteMenuItem(restId, itemId);
+        return ResponseEntity.noContent().build();
+    }
+
     // Helper to parse String id and throw a 400 with clear message when invalid
     private Long parseIdOrThrow(String idValue, String paramName) {
         try {

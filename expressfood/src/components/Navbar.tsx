@@ -20,7 +20,10 @@ export const Navbar: React.FC = () => {
         <header className="sticky top-0 z-40 w-full border-b bg-white/80 backdrop-blur-md supports-[backdrop-filter]:bg-white/60">
             <div className="container mx-auto flex h-16 items-center justify-between px-4">
                 <div className="flex items-center gap-4">
-                    <Link to="/" className="flex items-center gap-2">
+                    <Link
+                        to={user?.role === 'ROLE_RESTAURANT_OWNER' ? '/restaurant-owner/dashboard' : '/'}
+                        className="flex items-center gap-2"
+                    >
                         <div className="h-8 w-8 rounded-lg bg-emerald-600 flex items-center justify-center">
                             <span className="text-white font-bold text-xl">E</span>
                         </div>
@@ -80,6 +83,13 @@ export const Navbar: React.FC = () => {
                                         </Button>
                                     </Link>
                                 </>
+                            )}
+                            {user?.role === 'ROLE_RESTAURANT_OWNER' && (
+                                <Link to="/restaurant-owner/dashboard">
+                                    <Button variant="ghost" size="sm" className="hidden sm:flex">
+                                        Dashboard
+                                    </Button>
+                                </Link>
                             )}
                             {user?.role === 'ROLE_ADMIN' && (
                                 <Link to="/admin">

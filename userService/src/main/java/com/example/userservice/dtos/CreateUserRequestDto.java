@@ -8,6 +8,7 @@ public class CreateUserRequestDto {
     private String email;
     private String password;
     private String role;
+    private Long restaurantId;
     private String phoneNumber;
     private String address;
 }

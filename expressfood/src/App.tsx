@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { CartProvider } from './context/CartContext';
 import { Navbar } from './components/Navbar';
@@ -11,6 +11,7 @@ import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
 import MyOrders from './pages/MyOrders';
 import DriverDashboard from './pages/DriverDashboard';
+import RestaurantOwnerDashboard from './pages/RestaurantOwnerDashboard';
 import DriverProfile from './pages/DriverProfile';
 import AdminDashboard from './pages/AdminDashboard';
 import RestaurantManagement from './pages/RestaurantManagement';
@@ -34,6 +35,7 @@ function App() {
                 <Route path="/track/:id" element={<OrderTracking />} />
                 <Route path="/my-orders" element={<MyOrders />} />
                 <Route path="/driver/dashboard" element={<DriverDashboard />} />
+                <Route path="/restaurant-owner/*" element={<RestaurantOwnerDashboard />} />
                 <Route path="/profile" element={<DriverProfile />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />

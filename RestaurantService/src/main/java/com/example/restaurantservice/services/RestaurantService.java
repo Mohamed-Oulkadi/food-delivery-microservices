@@ -59,6 +59,7 @@ public class RestaurantService {
         newItem.setName(menuItemDto.getName());
         newItem.setDescription(menuItemDto.getDescription());
         newItem.setPrice(menuItemDto.getPrice());
+        newItem.setImageUrl(menuItemDto.getImageUrl());
         newItem.setAvailable(menuItemDto.isAvailable());
 
         restaurant.getMenu().getItems().add(newItem);
@@ -80,7 +81,6 @@ public class RestaurantService {
         return restaurantRepository.save(existingRestaurant);
     }
 
-
     public void deleteRestaurant(Long restaurantId) {
         if (!restaurantRepository.existsById(restaurantId)) {
             throw new RuntimeException("Restaurant not found with id: " + restaurantId);
@@ -92,5 +92,37 @@ public class RestaurantService {
         // This is a placeholder for interaction with an Order Service
         System.out.printf("Updating status for order %s to %s%n", orderId, status);
         return String.format("Order %s status updated to %s", orderId, status);
+    }
+
+    public MenuItem updateMenuItem(Long restaurantId, Long menuItemId, MenuItemDto menuItemDto) {
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        Menu menu = restaurant.getMenu();
+        
+        MenuItem itemToUpdate = menu.getItems().stream()
+                .filter(item -> item.getMenuItemId().equals(menuItemId))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Menu item not found with id: " + menuItemId));
+        
+        itemToUpdate.setName(menuItemDto.getName());
+        itemToUpdate.setDescription(menuItemDto.getDescription());
+        itemToUpdate.setPrice(menuItemDto.getPrice());
+        itemToUpdate.setImageUrl(menuItemDto.getImageUrl());
+        itemToUpdate.setAvailable(menuItemDto.isAvailable());
+        
+        restaurantRepository.save(restaurant);
+        return itemToUpdate;
+    }
+
+    public void deleteMenuItem(Long restaurantId, Long menuItemId) {
+        Restaurant restaurant = getRestaurantById(restaurantId);
+        Menu menu = restaurant.getMenu();
+        
+        boolean removed = menu.getItems().removeIf(item -> item.getMenuItemId().equals(menuItemId));
+        
+        if (!removed) {
+            throw new RuntimeException("Menu item not found with id: " + menuItemId);
+        }
+        
+        restaurantRepository.save(restaurant);
     }
 }

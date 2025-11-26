@@ -10,4 +10,5 @@ public class RestaurantDto {
     private Double rating;
     private String deliveryTime;
     private String address;
+    private String phoneNumber;
 }

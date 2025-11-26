@@ -22,7 +22,9 @@ public class User {
     @Column(nullable = false)
     private String password; // This will store the HASHED password
 
-    private String role; // e.g., "ROLE_CUSTOMER", "ROLE_ADMIN", "ROLE_DRIVER"
+    private String role; // e.g., "ROLE_CUSTOMER", "ROLE_ADMIN", "ROLE_DRIVER", "ROLE_RESTAURANT_OWNER"
+    
+    private Long restaurantId; // For restaurant owners - links to their restaurant
     
     private String phoneNumber;
     

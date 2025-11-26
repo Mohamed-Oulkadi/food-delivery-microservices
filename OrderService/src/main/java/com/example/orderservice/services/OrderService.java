@@ -42,7 +42,7 @@ public class OrderService {
         } catch (NumberFormatException ex) {
             // ignore
         }
-        order.setStatus(OrderStatus.PREPARING);
+        order.setStatus(OrderStatus.PLACED);
 
         List<OrderItem> orderItems = new ArrayList<>();
         double totalAmount = 0.0;
@@ -112,6 +112,11 @@ public class OrderService {
     public List<Order> getOrdersByCustomer(Long customerId) {
         if (customerId == null) return List.of();
         return orderRepository.findByUserId(customerId);
+    }
+
+    public List<Order> getOrdersByRestaurant(Long restaurantId) {
+        if (restaurantId == null) return List.of();
+        return orderRepository.findByRestaurantId(restaurantId);
     }
 
     public OrderStatsDto getOrderStats() {

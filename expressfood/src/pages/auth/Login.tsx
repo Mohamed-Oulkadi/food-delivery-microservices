@@ -42,7 +42,8 @@ const Login: React.FC = () => {
                 username: response.data.username || formData.username,
                 email: response.data.email || '',
                 name: response.data.name || formData.username,
-                role: response.data.role || 'CUSTOMER'
+                role: response.data.role || 'CUSTOMER',
+                restaurantId: response.data.restaurantId
             };
 
             console.log('Setting user data:', userData);
@@ -53,6 +54,8 @@ const Login: React.FC = () => {
                 navigate('/driver/dashboard');
             } else if (userData.role === 'ROLE_ADMIN') {
                 navigate('/admin'); // Admin dashboard route
+            } else if (userData.role === 'ROLE_RESTAURANT_OWNER') {
+                navigate('/restaurant-owner/dashboard'); // Restaurant owner dashboard
             } else {
                 navigate('/'); // Customer goes to home
             }

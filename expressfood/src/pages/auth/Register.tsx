@@ -11,7 +11,8 @@ const Register: React.FC = () => {
         username: '',
         email: '',
         password: '',
-        role: 'CUSTOMER' // Default role
+        role: 'CUSTOMER', // Default role
+        restaurantId: undefined as number | undefined
     });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
@@ -98,9 +99,28 @@ const Register: React.FC = () => {
                             >
                                 <option value="CUSTOMER">Customer</option>
                                 <option value="DRIVER">Driver</option>
+                                <option value="ROLE_RESTAURANT_OWNER">Restaurant Owner</option>
                                 <option value="ADMIN">Admin</option>
                             </select>
                         </div>
+
+                        {formData.role === 'ROLE_RESTAURANT_OWNER' && (
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium">Restaurant ID</label>
+                                <Input
+                                    type="number"
+                                    name="restaurantId"
+                                    value={formData.restaurantId || ''}
+                                    onChange={(e) => setFormData(prev => ({
+                                        ...prev,
+                                        restaurantId: e.target.value ? parseInt(e.target.value) : undefined
+                                    }))}
+                                    required
+                                    placeholder="Enter your restaurant ID"
+                                />
+                                <p className="text-xs text-slate-500">Contact admin to get your restaurant ID</p>
+                            </div>
+                        )}
 
                         <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={loading}>
                             {loading ? 'Creating Account...' : 'Sign Up'}

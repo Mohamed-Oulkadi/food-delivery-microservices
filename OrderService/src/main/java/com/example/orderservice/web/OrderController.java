@@ -46,6 +46,18 @@ public class OrderController {
         }
     }
 
+    // GET /api/orders/restaurant/{restaurantId} - orders for a specific restaurant
+    @GetMapping("/restaurant/{restaurantId}")
+    public ResponseEntity<java.util.List<OrderDto>> getOrdersByRestaurant(@PathVariable String restaurantId) {
+        try {
+            Long id = Long.parseLong(restaurantId);
+            java.util.List<Order> orders = orderService.getOrdersByRestaurant(id);
+            return ResponseEntity.ok(orders.stream().map(this::toDto).collect(java.util.stream.Collectors.toList()));
+        } catch (NumberFormatException ex) {
+            return ResponseEntity.ok(java.util.List.of());
+        }
+    }
+
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDto> getOrderById(@PathVariable Long orderId) {
         return ResponseEntity.ok(toDto(orderService.getOrderById(orderId)));

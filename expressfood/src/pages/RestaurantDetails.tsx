@@ -23,7 +23,12 @@ export const RestaurantDetails: React.FC = () => {
 
                 const menuRes = await restaurantService.get(`/api/restaurants/${id}/menu`);
                 // Backend returns a Menu object with an items array
-                setMenu(menuRes.data.items || []);
+                // We need to inject restaurantId into each item because the backend entity doesn't have it
+                const itemsWithRestaurantId = (menuRes.data.items || []).map((item: any) => ({
+                    ...item,
+                    restaurantId: id
+                }));
+                setMenu(itemsWithRestaurantId);
             } catch (err) {
                 console.error('Failed to fetch data:', err);
                 // Mock menu data

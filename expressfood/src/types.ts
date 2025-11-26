@@ -28,6 +28,7 @@ export interface User {
     name: string;
     username: string;
     role?: string;
+    restaurantId?: number;
     phoneNumber?: string;
     address?: string;
     active?: boolean;
@@ -39,7 +40,7 @@ export interface Order {
     restaurantId: string;
     items: CartItem[];
     totalAmount: number;
-    status: 'PENDING' | 'CONFIRMED' | 'PREPARING' | 'IN_TRANSIT' | 'DELIVERED';
+    status: 'PLACED' | 'ACCEPTED' | 'PREPARING' | 'READY_FOR_PICKUP' | 'DELIVERING' | 'DELIVERED' | 'COMPLETED' | 'CANCELLED';
     createdAt: string;
 }
 
