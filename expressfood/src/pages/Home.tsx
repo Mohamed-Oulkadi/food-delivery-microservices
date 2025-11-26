@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { MapPin, Star, Clock } from 'lucide-react';
+import { MapPin, Star, Clock, Filter } from 'lucide-react';
 import { restaurantService } from '../api/axios';
 import type { Restaurant } from '../types';
 import { Card, CardContent } from '../components/ui/Card';
@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button';
 
 export const Home: React.FC = () => {
     const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
+    const [selectedCuisine, setSelectedCuisine] = useState<string>('All');
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -23,7 +24,7 @@ export const Home: React.FC = () => {
                     {
                         id: '1',
                         name: 'Burger King',
-                        cuisine: 'American',
+                        cuisineType: 'American',
                         rating: 4.5,
                         imageUrl: 'https://images.unsplash.com/photo-1571091718767-18b5b1457add?w=800&q=80',
                         address: '123 Main St',
@@ -33,7 +34,7 @@ export const Home: React.FC = () => {
                     {
                         id: '2',
                         name: 'Sushi Master',
-                        cuisine: 'Japanese',
+                        cuisineType: 'Japanese',
                         rating: 4.8,
                         imageUrl: 'https://images.unsplash.com/photo-1579871494447-9811cf80d66c?w=800&q=80',
                         address: '456 Oak Ave',
@@ -43,7 +44,7 @@ export const Home: React.FC = () => {
                     {
                         id: '3',
                         name: 'Pizza Hut',
-                        cuisine: 'Italian',
+                        cuisineType: 'Italian',
                         rating: 4.2,
                         imageUrl: 'https://images.unsplash.com/photo-1604382354936-07c5d9983bd3?w=800&q=80',
                         address: '789 Pine Rd',
@@ -85,7 +86,24 @@ export const Home: React.FC = () => {
 
             {/* Restaurant Grid */}
             <section className="container mx-auto px-4">
-                <h2 className="text-2xl font-bold mb-6">Popular Restaurants</h2>
+                <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                    <h2 className="text-2xl font-bold">Popular Restaurants</h2>
+
+                    <div className="flex items-center gap-2">
+                        <Filter className="h-4 w-4 text-slate-500" />
+                        <span className="text-sm font-medium text-slate-700">Filter by:</span>
+                        <select
+                            value={selectedCuisine}
+                            onChange={(e) => setSelectedCuisine(e.target.value)}
+                            className="bg-white border border-slate-200 rounded-lg px-3 py-1.5 text-sm font-medium text-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                        >
+                            <option value="All">All Cuisines</option>
+                            {Array.from(new Set(restaurants.map(r => r.cuisineType))).sort().map(cuisine => (
+                                <option key={cuisine} value={cuisine}>{cuisine}</option>
+                            ))}
+                        </select>
+                    </div>
+                </div>
 
                 {loading ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -95,41 +113,43 @@ export const Home: React.FC = () => {
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {restaurants.map((restaurant) => (
-                            <Link key={restaurant.id} to={`/restaurant/${restaurant.id}`}>
-                                <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full border-none shadow-md">
-                                    <div className="relative h-48 w-full">
-                                        <img
-                                            src={restaurant.imageUrl || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80'}
-                                            alt={restaurant.name}
-                                            className="h-full w-full object-cover"
-                                        />
-                                        <Badge className="absolute top-4 right-4 bg-white/90 text-slate-900 backdrop-blur-sm">
-                                            {restaurant.cuisine}
-                                        </Badge>
-                                    </div>
-                                    <CardContent className="p-4">
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h3 className="text-xl font-bold">{restaurant.name}</h3>
-                                            <div className="flex items-center gap-1 bg-emerald-100 px-2 py-1 rounded-lg">
-                                                <Star className="h-4 w-4 text-emerald-600 fill-emerald-600" />
-                                                <span className="text-sm font-bold text-emerald-700">{restaurant.rating}</span>
-                                            </div>
+                        {restaurants
+                            .filter(r => selectedCuisine === 'All' || r.cuisineType === selectedCuisine)
+                            .map((restaurant) => (
+                                <Link key={restaurant.id} to={`/restaurant/${restaurant.id}`}>
+                                    <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full border-none shadow-md">
+                                        <div className="relative h-48 w-full">
+                                            <img
+                                                src={restaurant.imageUrl || 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80'}
+                                                alt={restaurant.name}
+                                                className="h-full w-full object-cover"
+                                            />
+                                            <Badge className="absolute top-4 right-4 bg-white/90 text-slate-900 backdrop-blur-sm">
+                                                {restaurant.cuisineType}
+                                            </Badge>
                                         </div>
-                                        <div className="flex items-center gap-4 text-slate-500 text-sm">
-                                            <div className="flex items-center gap-1">
-                                                <Clock className="h-4 w-4" />
-                                                <span>{restaurant.deliveryTime || '20-30 min'}</span>
+                                        <CardContent className="p-4">
+                                            <div className="flex justify-between items-start mb-2">
+                                                <h3 className="text-xl font-bold">{restaurant.name}</h3>
+                                                <div className="flex items-center gap-1 bg-emerald-100 px-2 py-1 rounded-lg">
+                                                    <Star className="h-4 w-4 text-emerald-600 fill-emerald-600" />
+                                                    <span className="text-sm font-bold text-emerald-700">{restaurant.rating}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center gap-1">
-                                                <MapPin className="h-4 w-4" />
-                                                <span>{restaurant.address || '1.2 km away'}</span>
+                                            <div className="flex items-center gap-4 text-slate-500 text-sm">
+                                                <div className="flex items-center gap-1">
+                                                    <Clock className="h-4 w-4" />
+                                                    <span>{restaurant.deliveryTime || '20-30 min'}</span>
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <MapPin className="h-4 w-4" />
+                                                    <span>{restaurant.address || '1.2 km away'}</span>
+                                                </div>
                                             </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        ))}
+                                        </CardContent>
+                                    </Card>
+                                </Link>
+                            ))}
                     </div>
                 )}
             </section>

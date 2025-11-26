@@ -136,10 +136,6 @@ const OrderTracking: React.FC = () => {
                             if (step.id === 'PENDING') {
                                 // PENDING icon is always active (green)
                                 isActive = true;
-                            } else if (step.id === 'PREPARING') {
-                                // PREPARING icon is green for all initial states and when actually preparing
-                                // Include: PENDING, PLACED, CONFIRMED, ACCEPTED, PREPARING
-                                isActive = ['PENDING', 'PLACED', 'CONFIRMED', 'ACCEPTED', 'PREPARING'].includes(status) || index <= currentStepIndex;
                             } else {
                                 // Other steps use normal progression logic
                                 isActive = index <= currentStepIndex;
@@ -185,7 +181,7 @@ const OrderTracking: React.FC = () => {
 
             {status !== 'COMPLETED' && (
                 <div className="text-center space-y-4">
-                    <p className="text-slate-500 animate-pulse">Updating status...</p>
+
 
                     {(status === 'IN_TRANSIT' || status === 'PICKED_UP') && (
                         <div className="pt-4 animate-in fade-in slide-in-from-bottom-4">

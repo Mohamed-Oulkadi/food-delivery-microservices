@@ -49,6 +49,9 @@ public class DeliveryService {
     }
 
     @Transactional
+    private final org.springframework.web.client.RestTemplate restTemplate;
+
+    @Transactional
     public Delivery updateDeliveryStatus(Long deliveryId, UpdateDeliveryStatusDto statusUpdate) {
         Delivery delivery = getDeliveryById(deliveryId);
         DeliveryStatus newStatus = DeliveryStatus.valueOf(statusUpdate.getStatus().toUpperCase());
@@ -58,8 +61,31 @@ public class DeliveryService {
         if (newStatus == DeliveryStatus.DELIVERED) {
             delivery.setActualDeliveryTime(LocalDateTime.now());
         }
+        
+        Delivery savedDelivery = deliveryRepository.save(delivery);
 
-        return deliveryRepository.save(delivery);
+        // Sync with Order Service
+        try {
+            String orderStatus = null;
+            if (newStatus == DeliveryStatus.PICKED_UP) {
+                orderStatus = "DELIVERING";
+            } else if (newStatus == DeliveryStatus.DELIVERED) {
+                orderStatus = "DELIVERED";
+            }
+
+            if (orderStatus != null) {
+                String url = "http://backend_order_service:8081/api/orders/" + delivery.getOrderId() + "/status";
+                java.util.Map<String, String> body = new java.util.HashMap<>();
+                body.put("status", orderStatus);
+                restTemplate.put(url, body);
+                System.out.println("Updated Order " + delivery.getOrderId() + " status to " + orderStatus);
+            }
+        } catch (Exception e) {
+            System.err.println("Failed to update Order Service: " + e.getMessage());
+            // Don't rollback delivery update just because sync failed, but log it
+        }
+
+        return savedDelivery;
     }
 
     public java.util.List<Delivery> getPendingDeliveries() {

@@ -63,7 +63,7 @@ export const RestaurantDetails: React.FC = () => {
                     <div className="container mx-auto">
                         <h1 className="text-4xl font-bold mb-2">{restaurant.name}</h1>
                         <div className="flex items-center gap-6 text-sm font-medium">
-                            <span className="bg-emerald-600 px-3 py-1 rounded-full">{restaurant.cuisine}</span>
+                            <span className="bg-emerald-600 px-3 py-1 rounded-full">{restaurant.cuisineType}</span>
                             <div className="flex items-center gap-1">
                                 <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                                 <span>{restaurant.rating} (500+ ratings)</span>

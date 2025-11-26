@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Package, Truck, CheckCircle, Clock, MapPin, User, History, Calendar, DollarSign } from 'lucide-react';
-import { orderService, deliveryService } from '../api/axios';
+import { orderService, deliveryService, restaurantService } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import type { Restaurant } from '../types';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Badge } from '../components/ui/Badge';
 import { Button } from '../components/ui/Button';
@@ -44,6 +45,7 @@ const DriverDashboard: React.FC = () => {
     const [availableOrders, setAvailableOrders] = useState<Order[]>([]);
     const [activeDeliveries, setActiveDeliveries] = useState<Delivery[]>([]);
     const [deliveryHistory, setDeliveryHistory] = useState<Delivery[]>([]);
+    const [restaurants, setRestaurants] = useState<Record<number, Restaurant>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -68,7 +70,7 @@ const DriverDashboard: React.FC = () => {
             // 1. Fetch Available Orders
             const ordersRes = await orderService.get('/api/orders');
             const available = (ordersRes.data || []).filter(
-                (order: Order) => ['PLACED', 'ACCEPTED', 'PREPARING', 'READY_FOR_PICKUP'].includes(order.status)
+                (order: Order) => order.status === 'READY_FOR_PICKUP'
             );
             setAvailableOrders(available);
 
@@ -91,6 +93,32 @@ const DriverDashboard: React.FC = () => {
             } catch (err) {
                 console.log('No delivery history:', err);
                 setDeliveryHistory([]);
+            }
+
+            // 4. Fetch Restaurant Details
+            const restaurantIds = new Set<number>();
+            available.forEach((o: Order) => restaurantIds.add(o.restaurantId));
+            // Add IDs from active deliveries if they have them (though delivery object might not have restaurantId directly, usually it's on the order)
+            // For simplicity, we'll fetch for available orders first. 
+            // If active deliveries need it, we might need to fetch order details for them too if not present.
+
+            const newRestaurants: Record<number, Restaurant> = { ...restaurants };
+            let hasNew = false;
+
+            for (const id of restaurantIds) {
+                if (!newRestaurants[id]) {
+                    try {
+                        const res = await restaurantService.get(`/api/restaurants/${id}`);
+                        newRestaurants[id] = res.data;
+                        hasNew = true;
+                    } catch (err) {
+                        console.error(`Failed to fetch restaurant ${id}`, err);
+                    }
+                }
+            }
+
+            if (hasNew) {
+                setRestaurants(newRestaurants);
             }
 
         } catch (err) {
@@ -164,8 +192,8 @@ const DriverDashboard: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('available')}
                         className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${activeTab === 'available'
-                                ? 'bg-white text-emerald-600 shadow-sm'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                            ? 'bg-white text-emerald-600 shadow-sm'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                             }`}
                     >
                         <Package className="h-4 w-4" />
@@ -179,8 +207,8 @@ const DriverDashboard: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('active')}
                         className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${activeTab === 'active'
-                                ? 'bg-white text-emerald-600 shadow-sm'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                            ? 'bg-white text-emerald-600 shadow-sm'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                             }`}
                     >
                         <Truck className="h-4 w-4" />
@@ -194,8 +222,8 @@ const DriverDashboard: React.FC = () => {
                     <button
                         onClick={() => setActiveTab('history')}
                         className={`flex-1 md:flex-none px-6 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2 ${activeTab === 'history'
-                                ? 'bg-white text-emerald-600 shadow-sm'
-                                : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
+                            ? 'bg-white text-emerald-600 shadow-sm'
+                            : 'text-slate-600 hover:text-slate-900 hover:bg-slate-200/50'
                             }`}
                     >
                         <History className="h-4 w-4" />
@@ -233,8 +261,8 @@ const DriverDashboard: React.FC = () => {
                                                             </Badge>
                                                             <span className="text-xs text-slate-500">2 mins ago</span>
                                                         </div>
-                                                        <h3 className="font-bold text-lg">Restaurant Name</h3>
-                                                        <p className="text-sm text-slate-500 mb-2">123 Restaurant St, City</p>
+                                                        <h3 className="font-bold text-lg">{restaurants[order.restaurantId]?.name || 'Loading...'}</h3>
+                                                        <p className="text-sm text-slate-500 mb-2">{restaurants[order.restaurantId]?.address || 'Loading address...'}</p>
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="text-2xl font-bold text-emerald-600">${(order.totalAmount * 0.15).toFixed(2)}</p>
@@ -249,7 +277,7 @@ const DriverDashboard: React.FC = () => {
                                                         </div>
                                                         <div>
                                                             <p className="text-sm font-medium">Pickup</p>
-                                                            <p className="text-sm text-slate-500">Restaurant Name</p>
+                                                            <p className="text-sm text-slate-500">{restaurants[order.restaurantId]?.name || 'Restaurant'}</p>
                                                         </div>
                                                     </div>
                                                     <div className="flex items-start gap-3">
