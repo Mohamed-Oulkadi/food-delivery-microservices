@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CreditCard, MapPin } from 'lucide-react';
+import { ArrowLeft, CreditCard, MapPin, AlertCircle } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { orderService } from '../api/axios';
@@ -13,7 +13,17 @@ export const Checkout: React.FC = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
-    const [address, setAddress] = useState('123 Main St, New York, NY'); // Mock address
+    const [address, setAddress] = useState(user?.address || '');
+    const [showProfileModal, setShowProfileModal] = useState(false);
+
+    useEffect(() => {
+        if (user) {
+            setAddress(user.address || '');
+            if (!user.phoneNumber || !user.address) {
+                setShowProfileModal(true);
+            }
+        }
+    }, [user]);
 
     // Redirect to login if user is not authenticated
     useEffect(() => {
@@ -176,6 +186,40 @@ export const Checkout: React.FC = () => {
                     </Card>
                 </div>
             </div>
+
+            {/* Profile Completion Modal */}
+            {showProfileModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <Card className="max-w-md w-full">
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2 text-amber-600">
+                                <AlertCircle className="h-6 w-6" />
+                                Profile Incomplete
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <p className="text-slate-600">
+                                You need to complete your profile with a phone number and delivery address before placing an order.
+                            </p>
+                            <div className="flex flex-col gap-3 pt-2">
+                                <Button
+                                    onClick={() => navigate('/profile')}
+                                    className="bg-emerald-600 hover:bg-emerald-700 w-full"
+                                >
+                                    Complete Profile
+                                </Button>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => navigate('/')}
+                                    className="w-full"
+                                >
+                                    Cancel Order
+                                </Button>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
         </div>
     );
 };

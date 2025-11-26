@@ -77,7 +77,7 @@ export const Navbar: React.FC = () => {
                                             Dashboard
                                         </Button>
                                     </Link>
-                                    <Link to="/profile">
+                                    <Link to="/driver/profile">
                                         <Button variant="ghost" size="sm" className="hidden sm:flex">
                                             Profile
                                         </Button>

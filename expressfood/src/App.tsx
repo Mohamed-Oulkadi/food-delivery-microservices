@@ -18,6 +18,7 @@ import RestaurantManagement from './pages/RestaurantManagement';
 import CustomerManagement from './pages/CustomerManagement';
 import DriverManagement from './pages/DriverManagement';
 import { AdminLayout } from './components/AdminLayout';
+import { CustomerProfile } from './pages/CustomerProfile';
 
 function App() {
   return (
@@ -36,7 +37,8 @@ function App() {
                 <Route path="/my-orders" element={<MyOrders />} />
                 <Route path="/driver/dashboard" element={<DriverDashboard />} />
                 <Route path="/restaurant-owner/*" element={<RestaurantOwnerDashboard />} />
-                <Route path="/profile" element={<DriverProfile />} />
+                <Route path="/profile" element={<CustomerProfile />} />
+                <Route path="/driver/profile" element={<DriverProfile />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 {/* Admin Routes */}
