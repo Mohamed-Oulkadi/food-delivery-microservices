@@ -39,16 +39,35 @@ export const updateRestaurant = async (restaurantId: number | string, restaurant
 // Menu Management
 export const getRestaurantMenu = async (restaurantId: number | string) => {
     const response = await restaurantServiceApi.get(`/restaurants/${restaurantId}/menu`);
+    // Map backend 'available' field to frontend 'isAvailable' field
+    if (response.data && response.data.items) {
+        response.data.items = response.data.items.map((item: any) => ({
+            ...item,
+            isAvailable: item.available !== undefined ? item.available : item.isAvailable
+        }));
+    }
     return response.data;
 };
 
 export const addMenuItem = async (restaurantId: number | string, menuItem: any) => {
-    const response = await restaurantServiceApi.post(`/restaurants/${restaurantId}/menu/items`, menuItem);
+    // Map frontend 'isAvailable' field to backend 'available' field
+    const backendMenuItem = {
+        ...menuItem,
+        available: menuItem.isAvailable !== undefined ? menuItem.isAvailable : menuItem.available
+    };
+    delete backendMenuItem.isAvailable;
+    const response = await restaurantServiceApi.post(`/restaurants/${restaurantId}/menu/items`, backendMenuItem);
     return response.data;
 };
 
 export const updateMenuItem = async (restaurantId: number | string, menuItemId: number | string, menuItem: any) => {
-    const response = await restaurantServiceApi.put(`/restaurants/${restaurantId}/menu/items/${menuItemId}`, menuItem);
+    // Map frontend 'isAvailable' field to backend 'available' field
+    const backendMenuItem = {
+        ...menuItem,
+        available: menuItem.isAvailable !== undefined ? menuItem.isAvailable : menuItem.available
+    };
+    delete backendMenuItem.isAvailable;
+    const response = await restaurantServiceApi.put(`/restaurants/${restaurantId}/menu/items/${menuItemId}`, backendMenuItem);
     return response.data;
 };
 

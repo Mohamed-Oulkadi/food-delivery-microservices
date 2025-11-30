@@ -42,7 +42,9 @@ const Login: React.FC = () => {
                 email: response.data.email || '',
                 name: response.data.name || formData.username,
                 role: response.data.role || 'CUSTOMER',
-                restaurantId: response.data.restaurantId
+                restaurantId: response.data.restaurantId,
+                phoneNumber: response.data.phoneNumber || '',
+                address: response.data.address || ''
             };
 
             login(mockToken, userData);

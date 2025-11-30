@@ -997,7 +997,7 @@ const MenuView: React.FC<{
                             <div className="p-4">
                                 <div className="flex justify-between items-start mb-2">
                                     <h3 className="text-lg font-semibold">{item.name}</h3>
-                                    <span className={`px-2 py-1 rounded text-xs ${item.isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                    <span className={`px-2 py-1 rounded text-xs font-semibold ${item.isAvailable ? 'bg-emerald-500 text-white' : 'bg-red-100 text-red-800'
                                         }`}>
                                         {item.isAvailable ? 'Available' : 'Unavailable'}
                                     </span>

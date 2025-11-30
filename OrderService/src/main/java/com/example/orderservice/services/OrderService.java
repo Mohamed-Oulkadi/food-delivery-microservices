@@ -43,6 +43,13 @@ public class OrderService {
             // ignore
         }
         order.setStatus(OrderStatus.PLACED);
+        
+        // Set delivery address
+        if (orderRequest.getDeliveryAddress() != null && !orderRequest.getDeliveryAddress().isEmpty()) {
+            order.setDeliveryAddress(orderRequest.getDeliveryAddress());
+        } else {
+            order.setDeliveryAddress("Customer Address Placeholder");
+        }
 
         List<OrderItem> orderItems = new ArrayList<>();
         double totalAmount = 0.0;
@@ -76,7 +83,7 @@ public class OrderService {
         DeliveryRequestDto deliveryRequestDto = new DeliveryRequestDto();
         deliveryRequestDto.setOrderId(savedOrder.getOrderId());
         // In a real system, you would fetch customer address and restaurant name from other services
-        deliveryRequestDto.setCustomerAddress("Customer Address Placeholder");
+        deliveryRequestDto.setCustomerAddress(savedOrder.getDeliveryAddress());
         deliveryRequestDto.setRestaurantName("Restaurant Name Placeholder");
 
         webClient.post()

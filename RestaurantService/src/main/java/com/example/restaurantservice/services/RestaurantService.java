@@ -125,4 +125,33 @@ public class RestaurantService {
         
         restaurantRepository.save(restaurant);
     }
+
+    public java.util.Map<String, Object> markAllMenuItemsAvailable() {
+        List<Restaurant> allRestaurants = restaurantRepository.findAll();
+        int totalItemsUpdated = 0;
+        int totalRestaurants = 0;
+
+        for (Restaurant restaurant : allRestaurants) {
+            Menu menu = restaurant.getMenu();
+            if (menu != null && menu.getItems() != null) {
+                for (MenuItem item : menu.getItems()) {
+                    if (!item.isAvailable()) {
+                        item.setAvailable(true);
+                        totalItemsUpdated++;
+                    }
+                }
+                if (!menu.getItems().isEmpty()) {
+                    totalRestaurants++;
+                    restaurantRepository.save(restaurant);
+                }
+            }
+        }
+
+        return java.util.Map.of(
+            "success", true,
+            "message", "All menu items marked as available",
+            "totalRestaurants", totalRestaurants,
+            "totalItemsUpdated", totalItemsUpdated
+        );
+    }
 }

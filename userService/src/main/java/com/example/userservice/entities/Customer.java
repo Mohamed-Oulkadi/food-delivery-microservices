@@ -11,6 +11,4 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class Customer extends User {
     
-    private String phoneNumber;
-    private String address;
 }
