@@ -24,6 +24,7 @@ export interface CartItem extends MenuItem {
 
 export interface User {
     id: string;
+    userId?: number; // Backend uses userId
     email: string;
     name: string;
     username: string;
@@ -32,6 +33,8 @@ export interface User {
     phoneNumber?: string;
     address?: string;
     active?: boolean;
+    cnie?: string;
+    vehicle?: string;
 }
 
 export interface Order {

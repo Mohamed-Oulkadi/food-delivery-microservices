@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Truck, CheckCircle, Clock, MapPin, History, Calendar } from 'lucide-react';
-import { orderService, deliveryService, restaurantService } from '../api/axios';
+import { Package, Truck, CheckCircle, Clock, MapPin, History, Calendar, AlertCircle } from 'lucide-react';
+import { orderService, deliveryService, restaurantService, userService } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import type { Restaurant } from '../types';
 import { Card, CardContent } from '../components/ui/Card';
@@ -16,7 +16,7 @@ interface OrderItem {
 
 interface Order {
     id: number;
-    customerId: number;
+    userId: number;
     restaurantId: number;
     totalAmount: number;
     status: string;
@@ -31,7 +31,6 @@ interface Delivery {
     driverId: number;
     status: string;
     pickupAddress?: string;
-    deliveryAddress?: string;
     customerAddress?: string;
     restaurantName?: string;
     estimatedDeliveryTime?: string;
@@ -46,9 +45,19 @@ const DriverDashboard: React.FC = () => {
     const [activeDeliveries, setActiveDeliveries] = useState<Delivery[]>([]);
     const [deliveryHistory, setDeliveryHistory] = useState<Delivery[]>([]);
     const [restaurants, setRestaurants] = useState<Record<number, Restaurant>>({});
+    const [activeDeliveryOrders, setActiveDeliveryOrders] = useState<Record<number, Order>>({});
+    const [customerDetails, setCustomerDetails] = useState<Record<number, any>>({});
+    const [historyOrders, setHistoryOrders] = useState<Record<number, Order>>({});
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        // Wait for auth to load from localStorage
+        // If user is null but we have a stored user in localStorage, don't redirect yet
+        if (user === null && localStorage.getItem('user')) {
+            // User is still loading from localStorage, don't redirect yet
+            return;
+        }
+
         if (user === null) {
             navigate('/login');
             return;
@@ -77,10 +86,42 @@ const DriverDashboard: React.FC = () => {
             // 2. Fetch Active Deliveries
             try {
                 const activeRes = await deliveryService.get(`/api/deliveries/driver/${user?.id}/active`);
-                setActiveDeliveries(activeRes.data || []);
+                const activeDeliveriesData = activeRes.data || [];
+                setActiveDeliveries(activeDeliveriesData);
+
+                // 2b. Fetch order details for each active delivery to get customer address
+                const orderDetailsMap: Record<number, Order> = {};
+
+                for (const delivery of activeDeliveriesData) {
+                    try {
+                        // Fetch order details which includes the customer's delivery address
+                        const orderRes = await orderService.get(`/api/orders/${delivery.orderId}`);
+                        orderDetailsMap[delivery.orderId] = orderRes.data;
+                    } catch (err) {
+                        console.error(`Failed to fetch order ${delivery.orderId}:`, err);
+                    }
+                }
+
+                setActiveDeliveryOrders(orderDetailsMap);
+
+                // 2c. Fetch customer details for each active delivery
+                const customerMap: Record<number, any> = {};
+                for (const delivery of activeDeliveriesData) {
+                    try {
+                        const order = orderDetailsMap[delivery.orderId];
+                        if (order && order.userId) {
+                            const userRes = await userService.get(`/api/users/${order.userId}`);
+                            customerMap[delivery.orderId] = userRes.data;
+                        }
+                    } catch (err) {
+                        console.error(`Failed to fetch customer for order ${delivery.orderId}:`, err);
+                    }
+                }
+                setCustomerDetails(customerMap);
             } catch (err) {
                 console.log('No active deliveries:', err);
                 setActiveDeliveries([]);
+                setActiveDeliveryOrders({});
             }
 
             // 3. Fetch Delivery History
@@ -90,9 +131,22 @@ const DriverDashboard: React.FC = () => {
                     (d: Delivery) => d.status === 'DELIVERED' || d.status === 'COMPLETED' || d.status === 'CANCELLED'
                 );
                 setDeliveryHistory(history);
+
+                // 3b. Fetch orders for history to get earnings
+                const historyOrdersMap: Record<number, Order> = {};
+                for (const h of history) {
+                    try {
+                        const orderRes = await orderService.get(`/api/orders/${h.orderId}`);
+                        historyOrdersMap[h.orderId] = orderRes.data;
+                    } catch (err) {
+                        console.error(`Failed to fetch order for history ${h.orderId}:`, err);
+                    }
+                }
+                setHistoryOrders(historyOrdersMap);
             } catch (err) {
                 console.log('No delivery history:', err);
                 setDeliveryHistory([]);
+                setHistoryOrders({});
             }
 
             // 4. Fetch Restaurant Details
@@ -186,6 +240,28 @@ const DriverDashboard: React.FC = () => {
         <div className="container mx-auto px-4 py-8">
             <div className="max-w-6xl mx-auto">
                 <h1 className="text-3xl font-bold mb-6">Driver Dashboard</h1>
+
+                {/* Profile Completion Warning */}
+                {(!user?.phoneNumber || !user?.address || !user?.cnie || !user?.vehicle) && (
+                    <div className="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-4">
+                        <div className="p-2 bg-amber-100 rounded-full">
+                            <AlertCircle className="h-6 w-6 text-amber-600" />
+                        </div>
+                        <div className="flex-1">
+                            <h3 className="text-lg font-bold text-amber-900 mb-1">Complete Your Profile</h3>
+                            <p className="text-amber-700 mb-3">
+                                You need to complete your profile (Phone, Address, CNIE, Vehicle) before you can accept delivery orders.
+                            </p>
+                            <Button
+                                onClick={() => navigate('/driver/profile')}
+                                className="bg-amber-600 hover:bg-amber-700 text-white border-none"
+                            >
+                                Complete Profile
+                            </Button>
+                        </div>
+                    </div>
+                )}
+
 
                 {/* Tabs Navigation */}
                 <div className="flex space-x-1 bg-slate-100 p-1 rounded-xl mb-8 w-full md:w-auto inline-flex">
@@ -286,7 +362,7 @@ const DriverDashboard: React.FC = () => {
                                                         </div>
                                                         <div>
                                                             <p className="text-sm font-medium">Dropoff</p>
-                                                            <p className="text-sm text-slate-500">{order.deliveryAddress || 'Customer Address'}</p>
+                                                            <p className="text-sm text-slate-500">{order.deliveryAddress || 'Loading address...'}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -298,8 +374,9 @@ const DriverDashboard: React.FC = () => {
                                                     </div>
                                                     <Button
                                                         onClick={() => acceptOrder(order.id)}
-                                                        disabled={activeDeliveries.length > 0}
-                                                        className="bg-emerald-600 hover:bg-emerald-700"
+                                                        disabled={activeDeliveries.length > 0 || !user?.phoneNumber || !user?.address || !user?.cnie || !user?.vehicle}
+                                                        className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                        title={(!user?.phoneNumber || !user?.address || !user?.cnie || !user?.vehicle) ? "Complete your profile to accept orders" : ""}
                                                     >
                                                         Accept Order
                                                     </Button>
@@ -343,7 +420,7 @@ const DriverDashboard: React.FC = () => {
                                                             </Badge>
                                                             {getStatusBadge(delivery.status)}
                                                         </div>
-                                                        <h3 className="text-2xl font-bold">Customer Name</h3>
+                                                        <h3 className="text-2xl font-bold">{customerDetails[delivery.orderId]?.username || 'Customer Name'}</h3>
                                                     </div>
                                                     <Button variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border-none">
                                                         Contact Customer
@@ -362,13 +439,18 @@ const DriverDashboard: React.FC = () => {
                                                             <div className="space-y-6 flex-1">
                                                                 <div>
                                                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pickup</p>
-                                                                    <p className="font-medium text-lg">{delivery.restaurantName || 'Restaurant Name'}</p>
-                                                                    <p className="text-slate-500">123 Restaurant St, City</p>
+                                                                    <p className="font-medium text-lg">{delivery.restaurantName || restaurants[activeDeliveryOrders[delivery.orderId]?.restaurantId]?.name || 'Restaurant Name'}</p>
+                                                                    <p className="text-slate-500">{restaurants[activeDeliveryOrders[delivery.orderId]?.restaurantId]?.address || 'Restaurant Address'}</p>
                                                                 </div>
                                                                 <div>
                                                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Dropoff</p>
-                                                                    <p className="font-medium text-lg">{delivery.customerAddress || 'Customer Address'}</p>
-                                                                    <p className="text-slate-500">Note: Please leave at door</p>
+                                                                    <p className="font-medium text-lg">
+                                                                        {activeDeliveryOrders[delivery.orderId]?.deliveryAddress || delivery.customerAddress || 'Loading address...'}
+                                                                    </p>
+                                                                    <p className="text-slate-500">
+                                                                        {activeDeliveryOrders[delivery.orderId]?.deliveryAddress || delivery.customerAddress || 'Loading address...'}
+                                                                    </p>
+                                                                    {/* Note removed as not available in backend */}
                                                                 </div>
                                                             </div>
                                                         </div>
@@ -405,20 +487,17 @@ const DriverDashboard: React.FC = () => {
                                                         <div className="space-y-3 text-sm">
                                                             <div className="flex justify-between">
                                                                 <span className="text-slate-500">Est. Arrival</span>
-                                                                <span className="font-medium">12:45 PM</span>
+                                                                <span className="font-medium">
+                                                                    {delivery.estimatedDeliveryTime ? new Date(delivery.estimatedDeliveryTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Calculating...'}
+                                                                </span>
                                                             </div>
-                                                            <div className="flex justify-between">
-                                                                <span className="text-slate-500">Distance</span>
-                                                                <span className="font-medium">3.2 km</span>
-                                                            </div>
+                                                            {/* Distance removed as not available */}
                                                             <div className="flex justify-between pt-3 border-t border-slate-200">
                                                                 <span className="font-bold">Expected Pay</span>
-                                                                <span className="font-bold text-emerald-600">$12.50</span>
+                                                                <span className="font-bold text-emerald-600">${(activeDeliveryOrders[delivery.orderId]?.totalAmount * 0.15).toFixed(2) || '0.00'}</span>
                                                             </div>
                                                         </div>
-                                                        <div className="mt-6 h-32 bg-slate-200 rounded-lg flex items-center justify-center text-slate-400">
-                                                            Map Placeholder
-                                                        </div>
+                                                        {/* Map placeholder removed */}
                                                     </div>
                                                 </div>
                                             </CardContent>
@@ -472,14 +551,14 @@ const DriverDashboard: React.FC = () => {
                                             {deliveryHistory.map(delivery => (
                                                 <tr key={delivery.deliveryId} className="hover:bg-slate-50 transition-colors">
                                                     <td className="px-6 py-4">
-                                                        <div className="font-medium">Today</div>
-                                                        <div className="text-slate-500 text-xs">12:30 PM</div>
+                                                        <div className="font-medium">{new Date(delivery.actualDeliveryTime || '').toLocaleDateString()}</div>
+                                                        <div className="text-slate-500 text-xs">{new Date(delivery.actualDeliveryTime || '').toLocaleTimeString()}</div>
                                                     </td>
                                                     <td className="px-6 py-4">#{delivery.orderId}</td>
                                                     <td className="px-6 py-4">{delivery.restaurantName || 'Restaurant'}</td>
                                                     <td className="px-6 py-4">{getStatusBadge(delivery.status)}</td>
                                                     <td className="px-6 py-4 text-right font-bold text-emerald-600">
-                                                        $12.50
+                                                        ${(historyOrders[delivery.orderId]?.totalAmount * 0.15).toFixed(2) || '0.00'}
                                                     </td>
                                                 </tr>
                                             ))}

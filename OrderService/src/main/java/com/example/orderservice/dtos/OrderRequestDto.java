@@ -8,5 +8,6 @@ public class OrderRequestDto {
     // Accept string IDs from the frontend (which may send UUIDs or numeric strings).
     private Long customerId;
     private Long restaurantId;
+    private String deliveryAddress;
     private List<OrderItemDto> items;
 }

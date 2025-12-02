@@ -86,6 +86,7 @@ public class OrderController {
         dto.setCustomerId(order.getUserId());
         dto.setRestaurantId(order.getRestaurantId());
         dto.setTotalAmount(order.getTotalAmount());
+        dto.setDeliveryAddress(order.getDeliveryAddress());
         dto.setStatus(order.getStatus());
         dto.setDate(order.getOrderDate());
         dto.setItems(order.getItems().stream().map(item -> {

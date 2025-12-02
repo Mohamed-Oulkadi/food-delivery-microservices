@@ -85,16 +85,27 @@ public class OrderService {
         // In a real system, you would fetch customer address and restaurant name from other services
         deliveryRequestDto.setCustomerAddress(savedOrder.getDeliveryAddress());
         deliveryRequestDto.setRestaurantName("Restaurant Name Placeholder");
+        
+        System.out.println("=== ORDER SERVICE: Creating delivery for order " + savedOrder.getOrderId() + " ===");
+        System.out.println("Customer Address being sent: " + deliveryRequestDto.getCustomerAddress());
 
-        webClient.post()
-                .uri("/api/deliveries")
-                .bodyValue(deliveryRequestDto)
-                .retrieve()
-                .bodyToMono(Void.class)
-                .subscribe(
+        try {
+            webClient.post()
+                    .uri("/api/deliveries")
+                    .bodyValue(deliveryRequestDto)
+                    .retrieve()
+                    .bodyToMono(Void.class)
+                    .subscribe(
                         response -> System.out.println("Delivery request sent successfully for order: " + savedOrder.getOrderId()),
-                        error -> System.err.println("Failed to send delivery request for order: " + savedOrder.getOrderId() + " Error: " + error.getMessage())
-                );
+                        error -> {
+                            System.err.println("Failed to send delivery request for order: " + savedOrder.getOrderId() + " Error: " + error.getMessage());
+                            error.printStackTrace();
+                        }
+                    );
+        } catch (Exception error) {
+            System.err.println("Failed to initiate delivery request for order: " + savedOrder.getOrderId() + " Error: " + error.getMessage());
+            error.printStackTrace();
+        }
 
         return savedOrder;
     }

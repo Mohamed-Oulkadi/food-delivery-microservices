@@ -32,10 +32,19 @@ public class DeliveryService {
         delivery.setDriverId(request.getDriverId()); // Can be null
         delivery.setCustomerAddress(request.getCustomerAddress());
         delivery.setRestaurantName(request.getRestaurantName());
-        delivery.setStatus(DeliveryStatus.ACCEPTED); // Driver creates it when accepting
+        delivery.setStatus(DeliveryStatus.PENDING); // Start as PENDING, driver accepts later
         delivery.setEstimatedDeliveryTime(LocalDateTime.now().plusMinutes(30)); // Simple estimate
+        
+        System.out.println("=== DELIVERY SERVICE: Creating delivery for order " + request.getOrderId() + " ===");
+        System.out.println("Customer Address received: " + request.getCustomerAddress());
+        System.out.println("Restaurant Name received: " + request.getRestaurantName());
 
-        return deliveryRepository.save(delivery);
+        Delivery saved = deliveryRepository.save(delivery);
+        
+        System.out.println("Delivery saved with ID: " + saved.getDeliveryId());
+        System.out.println("Saved Customer Address: " + saved.getCustomerAddress());
+        
+        return saved;
     }
 
     public Delivery getDeliveryById(Long deliveryId) {

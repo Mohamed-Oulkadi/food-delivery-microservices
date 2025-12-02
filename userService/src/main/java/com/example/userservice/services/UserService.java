@@ -30,12 +30,21 @@ public class UserService {
             throw new RuntimeException("Username already taken");
         }
 
-        User user = new User();
+        String role = request.getRole() != null ? request.getRole() : "ROLE_CUSTOMER";
+        
+        // Create appropriate entity type based on role
+        User user;
+        if ("ROLE_DRIVER".equals(role)) {
+            user = new com.example.userservice.entities.Driver();
+        } else {
+            user = new User();
+        }
+        
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         // HASH the password before saving
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole() != null ? request.getRole() : "ROLE_CUSTOMER");
+        user.setRole(role);
         user.setRestaurantId(request.getRestaurantId());
         user.setPhoneNumber(request.getPhoneNumber());
         user.setAddress(request.getAddress());
@@ -75,6 +84,12 @@ public class UserService {
         if (userDto.getAddress() != null) user.setAddress(userDto.getAddress());
         if (userDto.getActive() != null) user.setActive(userDto.getActive());
 
+        if (user instanceof com.example.userservice.entities.Driver) {
+            com.example.userservice.entities.Driver driver = (com.example.userservice.entities.Driver) user;
+            if (userDto.getCnie() != null) driver.setCnie(userDto.getCnie());
+            if (userDto.getVehicle() != null) driver.setVehicle(userDto.getVehicle());
+        }
+
         User updatedUser = userRepository.save(user);
         return mapToUserDto(updatedUser);
     }
@@ -99,6 +114,13 @@ public class UserService {
         dto.setActive(user.getActive());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
+        
+        if (user instanceof com.example.userservice.entities.Driver) {
+            com.example.userservice.entities.Driver driver = (com.example.userservice.entities.Driver) user;
+            dto.setCnie(driver.getCnie());
+            dto.setVehicle(driver.getVehicle());
+        }
+        
         return dto;
     }
 

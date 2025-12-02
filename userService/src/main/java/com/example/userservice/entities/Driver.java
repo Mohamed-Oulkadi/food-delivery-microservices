@@ -11,19 +11,17 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 public class Driver extends User {
     
-    private String phoneNumber;
-    private String address;
     private String vehicle;
-    private String cne; // Code National (National ID Card)
+    private String cnie; // CNIE - Carte Nationale d'Identité Électronique (National ID Card)
     
     /**
      * Check if the driver's profile is complete.
      * A driver must have all required fields filled to accept orders.
      */
     public boolean isProfileComplete() {
-        return phoneNumber != null && !phoneNumber.trim().isEmpty()
-                && address != null && !address.trim().isEmpty()
+        return getPhoneNumber() != null && !getPhoneNumber().trim().isEmpty()
+                && getAddress() != null && !getAddress().trim().isEmpty()
                 && vehicle != null && !vehicle.trim().isEmpty()
-                && cne != null && !cne.trim().isEmpty();
+                && cnie != null && !cnie.trim().isEmpty();
     }
 }

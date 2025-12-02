@@ -106,7 +106,6 @@ export const Checkout: React.FC = () => {
                                 onChange={(e) => setAddress(e.target.value)}
                                 className="mb-2"
                             />
-                            <p className="text-sm text-slate-500">Note: This is a mock address for demonstration.</p>
                         </CardContent>
                     </Card>
 

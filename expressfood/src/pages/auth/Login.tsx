@@ -37,14 +37,17 @@ const Login: React.FC = () => {
 
             // Extract user data
             const userData = {
-                id: response.data.id || response.data.userId || 1,
+                id: response.data.userId?.toString() || response.data.id || '1',
+                userId: response.data.userId,
                 username: response.data.username || formData.username,
                 email: response.data.email || '',
                 name: response.data.name || formData.username,
                 role: response.data.role || 'CUSTOMER',
                 restaurantId: response.data.restaurantId,
                 phoneNumber: response.data.phoneNumber || '',
-                address: response.data.address || ''
+                address: response.data.address || '',
+                cnie: response.data.cnie || '',
+                vehicle: response.data.vehicle || ''
             };
 
             login(mockToken, userData);

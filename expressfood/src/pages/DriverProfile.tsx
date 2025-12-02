@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { User, Phone, Mail, MapPin, AlertCircle, CheckCircle2, Save } from 'lucide-react';
+import { User, Phone, Mail, MapPin, AlertCircle, CheckCircle2, Save, Truck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { userService } from '../api/axios';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
@@ -19,6 +19,8 @@ const DriverProfile: React.FC = () => {
         email: user?.email || '',
         phoneNumber: user?.phoneNumber || '',
         address: user?.address || '',
+        cnie: user?.cnie || '',
+        vehicle: user?.vehicle || '',
     });
 
     useEffect(() => {
@@ -28,16 +30,18 @@ const DriverProfile: React.FC = () => {
                 email: user.email,
                 phoneNumber: user.phoneNumber || '',
                 address: user.address || '',
+                cnie: user.cnie || '',
+                vehicle: user.vehicle || '',
             });
         }
     }, [user]);
 
-    const isProfileComplete = formData.phoneNumber && formData.address;
+    const isProfileComplete = formData.phoneNumber && formData.address && formData.cnie && formData.vehicle;
 
     const handleSave = async () => {
         // Validate required fields
-        if (!formData.phoneNumber || !formData.address) {
-            setMessage({ type: 'error', text: 'Phone number and address are required to complete your profile.' });
+        if (!formData.phoneNumber || !formData.address || !formData.cnie || !formData.vehicle) {
+            setMessage({ type: 'error', text: 'All fields are required to complete your profile.' });
             return;
         }
 
@@ -45,12 +49,15 @@ const DriverProfile: React.FC = () => {
             setSaving(true);
             setMessage(null);
 
-            // Update user profile
-            await userService.put(`/api/users/${user?.id}`, {
+            // Update user profile - use userId from backend or fallback to id
+            const userIdForApi = user?.userId || user?.id;
+            await userService.put(`/api/users/${userIdForApi}`, {
                 username: formData.username,
                 email: formData.email,
                 phoneNumber: formData.phoneNumber,
                 address: formData.address,
+                cnie: formData.cnie,
+                vehicle: formData.vehicle,
                 role: user?.role,
                 active: user?.active ?? true
             });
@@ -60,13 +67,15 @@ const DriverProfile: React.FC = () => {
                 ...user!,
                 phoneNumber: formData.phoneNumber,
                 address: formData.address,
+                cnie: formData.cnie,
+                vehicle: formData.vehicle,
             };
             updateUser(updatedUser);
 
             setMessage({ type: 'success', text: 'Profile updated successfully!' });
 
             // If profile just became complete, redirect to dashboard after a short delay
-            if (formData.phoneNumber && formData.address && user?.role === 'ROLE_DRIVER') {
+            if (formData.phoneNumber && formData.address && formData.cnie && formData.vehicle && user?.role === 'ROLE_DRIVER') {
                 setTimeout(() => {
                     navigate('/driver/dashboard');
                 }, 1500);
@@ -93,7 +102,7 @@ const DriverProfile: React.FC = () => {
                     <div>
                         <h3 className="font-semibold text-amber-900 mb-1">Complete Your Profile</h3>
                         <p className="text-sm text-amber-700">
-                            Please add your phone number and address to start accepting delivery orders.
+                            Please complete all profile fields (Phone, Address, CNIE, Vehicle) to start accepting delivery orders.
                         </p>
                     </div>
                 </div>
@@ -203,13 +212,47 @@ const DriverProfile: React.FC = () => {
                                     />
                                 </div>
                             </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    CNIE (National ID) <span className="text-red-500">*</span>
+                                </label>
+                                <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100">
+                                    <User className="h-4 w-4 text-slate-400" />
+                                    <Input
+                                        type="text"
+                                        value={formData.cnie}
+                                        onChange={(e) => setFormData({ ...formData, cnie: e.target.value })}
+                                        placeholder="Enter your CNIE"
+                                        className="border-none p-0 focus:ring-0 bg-transparent"
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-slate-700">
+                                    Vehicle Type <span className="text-red-500">*</span>
+                                </label>
+                                <div className="flex items-center gap-2 p-3 bg-white rounded-lg border border-slate-200 focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-emerald-100">
+                                    <Truck className="h-4 w-4 text-slate-400" />
+                                    <Input
+                                        type="text"
+                                        value={formData.vehicle}
+                                        onChange={(e) => setFormData({ ...formData, vehicle: e.target.value })}
+                                        placeholder="e.g. Scooter, Bike, Car"
+                                        className="border-none p-0 focus:ring-0 bg-transparent"
+                                        required
+                                    />
+                                </div>
+                            </div>
                         </div>
 
                         {/* Save Button */}
                         <div className="pt-4 border-t border-slate-100 flex gap-3">
                             <Button
                                 onClick={handleSave}
-                                disabled={saving || !formData.phoneNumber || !formData.address}
+                                disabled={saving || !formData.phoneNumber || !formData.address || !formData.cnie || !formData.vehicle}
                                 className="bg-emerald-600 hover:bg-emerald-700"
                             >
                                 <Save className="h-4 w-4 mr-2" />

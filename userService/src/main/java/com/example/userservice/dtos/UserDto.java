@@ -15,4 +15,6 @@ public class UserDto {
     private Boolean active;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String cnie;
+    private String vehicle;
 }

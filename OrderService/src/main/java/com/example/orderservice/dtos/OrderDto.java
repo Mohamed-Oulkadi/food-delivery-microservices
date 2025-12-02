@@ -11,6 +11,7 @@ public class OrderDto {
     private Long id;
     private Long customerId;
     private Long restaurantId;
+    private String deliveryAddress;
     private List<OrderItemDto> items;
     private double totalAmount;
     private OrderStatus status;

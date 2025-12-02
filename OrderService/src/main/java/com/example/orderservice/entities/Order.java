@@ -20,6 +20,7 @@ public class Order {
     private Long userId;
     private Long restaurantId;
     private double totalAmount;
+    private String deliveryAddress;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
