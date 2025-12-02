@@ -17,6 +17,7 @@ interface OrderItem {
 interface Order {
     id: number;
     userId: number;
+    customerId: number; // Backend uses customerId for customer identification
     restaurantId: number;
     totalAmount: number;
     status: string;
@@ -49,6 +50,7 @@ const DriverDashboard: React.FC = () => {
     const [customerDetails, setCustomerDetails] = useState<Record<number, any>>({});
     const [historyOrders, setHistoryOrders] = useState<Record<number, Order>>({});
     const [loading, setLoading] = useState(true);
+    const [showPhone, setShowPhone] = useState<Record<number, boolean>>({});
 
     useEffect(() => {
         // Wait for auth to load from localStorage
@@ -83,6 +85,21 @@ const DriverDashboard: React.FC = () => {
             );
             setAvailableOrders(available);
 
+            // 1b. Fetch customer details for available orders
+            const availableCustomerMap: Record<number, any> = {};
+            for (const order of available) {
+                try {
+                    if (order.customerId) {
+                        const userRes = await userService.get(`/api/users/${order.customerId}`);
+                        availableCustomerMap[order.id] = userRes.data;
+                    }
+                } catch (err) {
+                    console.error(`Failed to fetch customer for available order ${order.id}:`, err);
+                }
+            }
+            // Merge with existing customer details
+            setCustomerDetails(prev => ({ ...prev, ...availableCustomerMap }));
+
             // 2. Fetch Active Deliveries
             try {
                 const activeRes = await deliveryService.get(`/api/deliveries/driver/${user?.id}/active`);
@@ -109,8 +126,8 @@ const DriverDashboard: React.FC = () => {
                 for (const delivery of activeDeliveriesData) {
                     try {
                         const order = orderDetailsMap[delivery.orderId];
-                        if (order && order.userId) {
-                            const userRes = await userService.get(`/api/users/${order.userId}`);
+                        if (order && order.customerId) {
+                            const userRes = await userService.get(`/api/users/${order.customerId}`);
                             customerMap[delivery.orderId] = userRes.data;
                         }
                     } catch (err) {
@@ -125,6 +142,7 @@ const DriverDashboard: React.FC = () => {
             }
 
             // 3. Fetch Delivery History
+            let historyOrdersMap: Record<number, Order> = {};
             try {
                 const historyRes = await deliveryService.get(`/api/deliveries/driver/${user?.id}`);
                 const history = (historyRes.data || []).filter(
@@ -133,7 +151,7 @@ const DriverDashboard: React.FC = () => {
                 setDeliveryHistory(history);
 
                 // 3b. Fetch orders for history to get earnings
-                const historyOrdersMap: Record<number, Order> = {};
+                // historyOrdersMap initialized above
                 for (const h of history) {
                     try {
                         const orderRes = await orderService.get(`/api/orders/${h.orderId}`);
@@ -152,9 +170,18 @@ const DriverDashboard: React.FC = () => {
             // 4. Fetch Restaurant Details
             const restaurantIds = new Set<number>();
             available.forEach((o: Order) => restaurantIds.add(o.restaurantId));
-            // Add IDs from active deliveries if they have them (though delivery object might not have restaurantId directly, usually it's on the order)
-            // For simplicity, we'll fetch for available orders first. 
-            // If active deliveries need it, we might need to fetch order details for them too if not present.
+            // Add restaurant IDs from active deliveries
+            Object.values(activeDeliveryOrders).forEach((order: Order) => {
+                if (order.restaurantId) {
+                    restaurantIds.add(order.restaurantId);
+                }
+            });
+            // Add restaurant IDs from history
+            (Object.values(historyOrdersMap) as Order[]).forEach((order: Order) => {
+                if (order.restaurantId) {
+                    restaurantIds.add(order.restaurantId);
+                }
+            });
 
             const newRestaurants: Record<number, Restaurant> = { ...restaurants };
             let hasNew = false;
@@ -362,7 +389,7 @@ const DriverDashboard: React.FC = () => {
                                                         </div>
                                                         <div>
                                                             <p className="text-sm font-medium">Dropoff</p>
-                                                            <p className="text-sm text-slate-500">{order.deliveryAddress || 'Loading address...'}</p>
+                                                            <p className="text-sm text-slate-500">{customerDetails[order.id]?.address || order.deliveryAddress || 'Loading...'}</p>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -420,10 +447,17 @@ const DriverDashboard: React.FC = () => {
                                                             </Badge>
                                                             {getStatusBadge(delivery.status)}
                                                         </div>
-                                                        <h3 className="text-2xl font-bold">{customerDetails[delivery.orderId]?.username || 'Customer Name'}</h3>
+                                                        <h3 className="text-2xl font-bold">{customerDetails[delivery.orderId]?.name || customerDetails[delivery.orderId]?.username || 'Loading...'}</h3>
                                                     </div>
-                                                    <Button variant="secondary" size="sm" className="bg-white/10 hover:bg-white/20 text-white border-none">
-                                                        Contact Customer
+                                                    <Button
+                                                        variant="secondary"
+                                                        size="sm"
+                                                        className="bg-white/10 hover:bg-white/20 text-white border-none min-w-[140px]"
+                                                        onClick={() => setShowPhone(prev => ({ ...prev, [delivery.deliveryId]: !prev[delivery.deliveryId] }))}
+                                                    >
+                                                        {showPhone[delivery.deliveryId]
+                                                            ? (customerDetails[delivery.orderId]?.phoneNumber || 'No Phone')
+                                                            : 'Contact Customer'}
                                                     </Button>
                                                 </div>
                                             </div>
@@ -439,16 +473,13 @@ const DriverDashboard: React.FC = () => {
                                                             <div className="space-y-6 flex-1">
                                                                 <div>
                                                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Pickup</p>
-                                                                    <p className="font-medium text-lg">{delivery.restaurantName || restaurants[activeDeliveryOrders[delivery.orderId]?.restaurantId]?.name || 'Restaurant Name'}</p>
-                                                                    <p className="text-slate-500">{restaurants[activeDeliveryOrders[delivery.orderId]?.restaurantId]?.address || 'Restaurant Address'}</p>
+                                                                    <p className="font-medium text-lg">{restaurants[activeDeliveryOrders[delivery.orderId]?.restaurantId]?.name || delivery.restaurantName || 'Loading...'}</p>
+                                                                    <p className="text-slate-500">{restaurants[activeDeliveryOrders[delivery.orderId]?.restaurantId]?.address || 'Loading...'}</p>
                                                                 </div>
                                                                 <div>
                                                                     <p className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Dropoff</p>
                                                                     <p className="font-medium text-lg">
-                                                                        {activeDeliveryOrders[delivery.orderId]?.deliveryAddress || delivery.customerAddress || 'Loading address...'}
-                                                                    </p>
-                                                                    <p className="text-slate-500">
-                                                                        {activeDeliveryOrders[delivery.orderId]?.deliveryAddress || delivery.customerAddress || 'Loading address...'}
+                                                                        {customerDetails[delivery.orderId]?.address || activeDeliveryOrders[delivery.orderId]?.deliveryAddress || delivery.customerAddress || 'Loading...'}
                                                                     </p>
                                                                     {/* Note removed as not available in backend */}
                                                                 </div>
@@ -555,7 +586,7 @@ const DriverDashboard: React.FC = () => {
                                                         <div className="text-slate-500 text-xs">{new Date(delivery.actualDeliveryTime || '').toLocaleTimeString()}</div>
                                                     </td>
                                                     <td className="px-6 py-4">#{delivery.orderId}</td>
-                                                    <td className="px-6 py-4">{delivery.restaurantName || 'Restaurant'}</td>
+                                                    <td className="px-6 py-4">{restaurants[historyOrders[delivery.orderId]?.restaurantId]?.name || delivery.restaurantName || 'Restaurant'}</td>
                                                     <td className="px-6 py-4">{getStatusBadge(delivery.status)}</td>
                                                     <td className="px-6 py-4 text-right font-bold text-emerald-600">
                                                         ${(historyOrders[delivery.orderId]?.totalAmount * 0.15).toFixed(2) || '0.00'}
