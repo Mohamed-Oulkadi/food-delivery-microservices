@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Package, Truck, CheckCircle, Clock, MapPin, History, Calendar, AlertCircle } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, MapPin, History, Calendar, AlertCircle, DollarSign, TrendingUp } from 'lucide-react';
 import { orderService, deliveryService, restaurantService, userService } from '../api/axios';
 import { useAuth } from '../context/AuthContext';
 import type { Restaurant } from '../types';
@@ -289,6 +289,38 @@ const DriverDashboard: React.FC = () => {
                     </div>
                 )}
 
+
+                {/* Stats Overview */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <Card className="bg-white border-none shadow-sm">
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-slate-500 mb-1">Total Orders</p>
+                                <h3 className="text-2xl font-bold text-slate-900">{deliveryHistory.length}</h3>
+                            </div>
+                            <div className="h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center">
+                                <TrendingUp className="h-6 w-6 text-blue-600" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-white border-none shadow-sm">
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-slate-500 mb-1">Total Earnings</p>
+                                <h3 className="text-2xl font-bold text-emerald-600">
+                                    ${deliveryHistory.reduce((sum, delivery) => {
+                                        const order = historyOrders[delivery.orderId];
+                                        return sum + (order ? order.totalAmount * 0.15 : 0);
+                                    }, 0).toFixed(2)}
+                                </h3>
+                            </div>
+                            <div className="h-12 w-12 bg-emerald-50 rounded-full flex items-center justify-center">
+                                <DollarSign className="h-6 w-6 text-emerald-600" />
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
 
                 {/* Tabs Navigation */}
                 <div className="flex space-x-1 bg-slate-100 p-1 rounded-xl mb-8 w-full md:w-auto inline-flex">
