@@ -141,12 +141,12 @@ const DriverDashboard: React.FC = () => {
                 setActiveDeliveryOrders({});
             }
 
-            // 3. Fetch Delivery History
+            // 3. Fetch Delivery History (only COMPLETED deliveries)
             let historyOrdersMap: Record<number, Order> = {};
             try {
                 const historyRes = await deliveryService.get(`/api/deliveries/driver/${user?.id}`);
                 const history = (historyRes.data || []).filter(
-                    (d: Delivery) => d.status === 'DELIVERED' || d.status === 'COMPLETED' || d.status === 'CANCELLED'
+                    (d: Delivery) => d.status === 'COMPLETED'
                 );
                 setDeliveryHistory(history);
 
@@ -291,7 +291,7 @@ const DriverDashboard: React.FC = () => {
 
 
                 {/* Stats Overview */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
                     <Card className="bg-white border-none shadow-sm">
                         <CardContent className="p-6 flex items-center justify-between">
                             <div>
@@ -307,16 +307,37 @@ const DriverDashboard: React.FC = () => {
                     <Card className="bg-white border-none shadow-sm">
                         <CardContent className="p-6 flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-slate-500 mb-1">Total Earnings</p>
+                                <p className="text-sm font-medium text-slate-500 mb-1">Confirmed Earnings</p>
                                 <h3 className="text-2xl font-bold text-emerald-600">
                                     ${deliveryHistory.reduce((sum, delivery) => {
                                         const order = historyOrders[delivery.orderId];
                                         return sum + (order ? order.totalAmount * 0.15 : 0);
                                     }, 0).toFixed(2)}
                                 </h3>
+                                <p className="text-xs text-slate-400 mt-1">Customer confirmed</p>
                             </div>
                             <div className="h-12 w-12 bg-emerald-50 rounded-full flex items-center justify-center">
                                 <DollarSign className="h-6 w-6 text-emerald-600" />
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="bg-white border-none shadow-sm">
+                        <CardContent className="p-6 flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-slate-500 mb-1">Pending Earnings</p>
+                                <h3 className="text-2xl font-bold text-amber-600">
+                                    ${activeDeliveries
+                                        .filter(d => d.status === 'DELIVERED')
+                                        .reduce((sum, delivery) => {
+                                            const order = activeDeliveryOrders[delivery.orderId];
+                                            return sum + (order ? order.totalAmount * 0.15 : 0);
+                                        }, 0).toFixed(2)}
+                                </h3>
+                                <p className="text-xs text-slate-400 mt-1">Awaiting confirmation</p>
+                            </div>
+                            <div className="h-12 w-12 bg-amber-50 rounded-full flex items-center justify-center">
+                                <Clock className="h-6 w-6 text-amber-600" />
                             </div>
                         </CardContent>
                     </Card>
@@ -556,9 +577,18 @@ const DriverDashboard: React.FC = () => {
                                                             </div>
                                                             {/* Distance removed as not available */}
                                                             <div className="flex justify-between pt-3 border-t border-slate-200">
-                                                                <span className="font-bold">Expected Pay</span>
-                                                                <span className="font-bold text-emerald-600">${(activeDeliveryOrders[delivery.orderId]?.totalAmount * 0.15).toFixed(2) || '0.00'}</span>
+                                                                <span className="font-bold">
+                                                                    {delivery.status === 'DELIVERED' ? 'Pending Earnings' : 'Expected Pay'}
+                                                                </span>
+                                                                <span className={`font-bold ${delivery.status === 'DELIVERED' ? 'text-amber-600' : 'text-emerald-600'}`}>
+                                                                    ${(activeDeliveryOrders[delivery.orderId]?.totalAmount * 0.15).toFixed(2) || '0.00'}
+                                                                </span>
                                                             </div>
+                                                            {delivery.status === 'DELIVERED' && (
+                                                                <p className="text-xs text-amber-600 mt-2">
+                                                                    Awaiting customer confirmation
+                                                                </p>
+                                                            )}
                                                         </div>
                                                         {/* Map placeholder removed */}
                                                     </div>

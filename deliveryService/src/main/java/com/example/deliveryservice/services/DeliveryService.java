@@ -16,6 +16,7 @@ import java.time.LocalDateTime;
 public class DeliveryService {
 
     private final DeliveryRepository deliveryRepository;
+    private final org.springframework.web.client.RestTemplate restTemplate;
 
     @Transactional
     public Delivery createDelivery(DeliveryRequestDto request) {
@@ -56,9 +57,6 @@ public class DeliveryService {
         return deliveryRepository.findByOrderId(orderId)
                 .orElseThrow(() -> new RuntimeException("Delivery not found for order: " + orderId));
     }
-
-    @Transactional
-    private final org.springframework.web.client.RestTemplate restTemplate;
 
     @Transactional
     public Delivery updateDeliveryStatus(Long deliveryId, UpdateDeliveryStatusDto statusUpdate) {

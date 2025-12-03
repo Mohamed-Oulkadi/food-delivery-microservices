@@ -9,9 +9,4 @@ public class DeliveryServiceApplication {
     public static void main(String[] args) {
         SpringApplication.run(DeliveryServiceApplication.class, args);
     }
-
-    @org.springframework.context.annotation.Bean
-    public org.springframework.web.client.RestTemplate restTemplate() {
-        return new org.springframework.web.client.RestTemplate();
-    }
 }

@@ -37,6 +37,8 @@ public class SecurityConfig {
 
                 // Define authorization rules
                 .authorizeHttpRequests(authz -> authz
+                        // Allow Swagger UI and API docs
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                         // For now, allow all requests to /users/**
                         .requestMatchers("/api/users/**").permitAll()
                         // All other requests (if any) must be authenticated
